@@ -1,0 +1,171 @@
+:root {
+    --primary-color: #1e5128; /* Dark Green */
+    --secondary-color: #4e9f3d; /* Lighter Green */
+    --dark-color: #191f1c; /* Very Dark Green/Black */
+    --light-color: #d8e9d8; /* Pale Green */
+    --success-color: #198754;
+    --danger-color: #dc3545;
+}
+
+body {
+    background-color: #f4f8f4; /* Very light green tint background */
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #333;
+    font-size: 18px;
+    line-height: 1.6;
+}
+
+/* Navbar */
+.navbar {
+    background-color: var(--primary-color) !important;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+    margin-bottom: 2rem;
+}
+
+.navbar-brand {
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.nav-link {
+    font-size: 1.2rem;
+    padding: 10px 15px !important;
+}
+
+/* Buttons */
+.btn {
+    padding: 10px 20px;
+    font-size: 1.1rem;
+    border-radius: 8px;
+    margin-right: 5px;
+    margin-bottom: 5px;
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.btn-primary:hover {
+    background-color: #14361b;
+    border-color: #14361b;
+}
+
+.btn-secondary {
+    background-color: #6c757d;
+    border-color: #6c757d;
+}
+
+.btn-lg {
+    padding: 12px 24px;
+    font-size: 1.25rem;
+}
+
+.d-grid .btn {
+    margin-right: 0;
+}
+
+/* Cards */
+.card {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    margin-bottom: 2rem;
+}
+
+.card-header {
+    background-color: var(--primary-color); /* Changed from secondary to primary for better contrast */
+    color: #fff;
+    padding: 1.25rem;
+    font-size: 1.25rem;
+    font-weight: 600;
+    border-top-left-radius: 12px !important;
+    border-top-right-radius: 12px !important;
+}
+
+.card-body {
+    padding: 1.5rem;
+}
+
+/* Forms */
+.form-label {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--dark-color);
+}
+
+.form-control, .form-select {
+    padding: 0.75rem 1rem;
+    font-size: 1.1rem;
+    border-radius: 8px;
+    border: 1px solid #ced4da;
+    margin-bottom: 1rem;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: var(--secondary-color);
+    box-shadow: 0 0 0 0.25rem rgba(78, 159, 61, 0.25);
+}
+
+.input-group {
+    margin-bottom: 1rem;
+}
+
+.input-group .form-control {
+    margin-bottom: 0;
+}
+
+/* Tables - Mobile Optimization */
+.table-responsive {
+    border-radius: 12px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin-bottom: 1rem;
+    border: 1px solid #eee;
+}
+
+.table th, .table td {
+    padding: 1rem;
+    vertical-align: middle;
+    white-space: nowrap;
+}
+
+.table thead th {
+    background-color: var(--dark-color);
+    color: white;
+    font-weight: 600;
+}
+
+/* Typography */
+h2 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    margin-bottom: 1.5rem;
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+    .container {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+
+    h2 {
+        font-size: 1.75rem;
+        text-align: center;
+    }
+    
+    .btn {
+        width: 100%;
+        margin-right: 0;
+    }
+    
+    /* Ensure table text is readable without being too huge on mobile */
+    .table th, .table td {
+        padding: 0.75rem;
+        font-size: 1rem;
+    }
+}

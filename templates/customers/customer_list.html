@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="mb-3 text-center text-md-start">
+    <h2>Clientes</h2>
+</div>
+<div class="mb-4 text-center text-md-start">
+    <a href="{% url 'customer_create' %}" class="btn btn-primary"><i class="fas fa-plus"></i> Nuevo Cliente</a>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Dirección</th>
+                        <th>Teléfono</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for customer in customers %}
+                        <tr>
+                            <td>{{ customer.name }}</td>
+                            <td>{{ customer.address }}</td>
+                            <td>{{ customer.phone_number }}</td>
+                            <td>
+                                <a href="{% url 'customer_update' customer.pk %}" class="btn btn-sm btn-info text-white" title="Editar"><i class="fas fa-edit"></i></a>
+                                <a href="{% url 'customer_delete' customer.pk %}" class="btn btn-sm btn-danger" title="Eliminar"><i class="fas fa-trash"></i></a>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="4" class="text-center py-4">No hay clientes registrados.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

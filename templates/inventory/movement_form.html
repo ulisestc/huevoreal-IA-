@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="card shadow">
+            <div class="card-header">
+                <h3 class="mb-0">Registrar Movimiento</h3>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.location.id_for_label }}" class="form-label">Ubicación</label>
+                        {{ form.location }}
+                        {{ form.location.errors }}
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="{{ form.movement_type.id_for_label }}" class="form-label">Tipo de Movimiento</label>
+                        {{ form.movement_type }}
+                        {{ form.movement_type.errors }}
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="{{ form.quantity.id_for_label }}" class="form-label">Cantidad</label>
+                        {{ form.quantity }}
+                        {{ form.quantity.errors }}
+                    </div>
+
+                    <div class="mb-3" id="div_id_merma" style="display: none;">
+                        <label for="{{ form.merma.id_for_label }}" class="form-label">Merma (Piezas Rotas/Malas)</label>
+                        {{ form.merma }}
+                        {{ form.merma.errors }}
+                        <div class="form-text">Solo rellene si hubo pérdida en la producción.</div>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary btn-lg">Guardar Movimiento</button>
+                        <a href="{% url 'movement_list' %}" class="btn btn-secondary btn-lg">Cancelar</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const movementTypeSelect = document.getElementById('id_movement_type');
+        const mermaDiv = document.getElementById('div_id_merma');
+        const mermaInput = document.getElementById('{{ form.merma.id_for_label }}');
+
+        function toggleMerma() {
+            if (movementTypeSelect.value === 'PRODUCCION') {
+                mermaDiv.style.display = 'block';
+            } else {
+                mermaDiv.style.display = 'none';
+                mermaInput.value = 0; // Reset merma if hidden
+            }
+        }
+
+        // Initial check
+        toggleMerma();
+
+        // Check on change
+        movementTypeSelect.addEventListener('change', toggleMerma);
+    });
+</script>
+{% endblock %}

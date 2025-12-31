@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="mb-3 text-center text-md-start">
+    <h2>Ventas</h2>
+</div>
+<div class="mb-4 text-center text-md-start">
+    <a href="{% url 'sale_create' %}" class="btn btn-primary"><i class="fas fa-plus"></i> Nueva Venta</a>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Cliente</th>
+                        <th>Tipo</th>
+                        <th>Cantidad</th>
+                        <th>Precio</th>
+                        <th>Total</th>
+                        <th>Pago</th>
+                        <th>Vendedor</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for sale in sales %}
+                        <tr>
+                            <td>
+                                {{ sale.day|date:"d/m/Y" }}<br>
+                                <small class="text-muted">{{ sale.day_of_week }}</small>
+                            </td>
+                            <td>{{ sale.customer }}</td>
+                            <td>{{ sale.get_sale_type_display }}</td>
+                            <td>
+                                {% if sale.sale_type == 'KILO' %}
+                                    {{ sale.quantity_kg }} kg
+                                {% else %}
+                                    {{ sale.quantity_piece }} pzas
+                                {% endif %}
+                            </td>
+                            <td>${{ sale.unit_price }}</td>
+                            <td>${{ sale.price }}</td>
+                            <td>
+                                <span class="badge bg-light text-dark border">{{ sale.get_payment_method_display }}</span><br>
+                                <small class="text-muted">{{ sale.payment_date|date:"d/m/Y" }}</small>
+                            </td>
+                            <td>{{ sale.seller }}</td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="8" class="text-center py-4">No hay ventas registradas.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

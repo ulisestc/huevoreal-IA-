@@ -1,0 +1,140 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="mb-4">
+    <h2 class="text-center text-md-start">Estadísticas del Negocio (Últimos 30 días)</h2>
+</div>
+
+<div class="row">
+    <!-- Ventas Diarias -->
+    <div class="col-lg-8 mb-4">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="fas fa-chart-line"></i> Tendencia de Ventas Diarias</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="salesTrendChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Metodos de Pago -->
+    <div class="col-lg-4 mb-4">
+        <div class="card shadow">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0"><i class="fas fa-wallet"></i> Métodos de Pago</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="paymentMethodChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Top Clientes -->
+    <div class="col-lg-12 mb-4">
+        <div class="card shadow">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0"><i class="fas fa-users"></i> Top 5 Clientes</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="customerChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    // Data from Django
+    const trendLabels = JSON.parse('{{ trend_labels|safe }}');
+    const trendData = JSON.parse('{{ trend_data|safe }}');
+    const paymentLabels = JSON.parse('{{ payment_labels|safe }}');
+    const paymentData = JSON.parse('{{ payment_data|safe }}');
+    const customerLabels = JSON.parse('{{ customer_labels|safe }}');
+    const customerData = JSON.parse('{{ customer_data|safe }}');
+
+    // 1. Sales Trend Chart
+    const ctxTrend = document.getElementById('salesTrendChart').getContext('2d');
+    new Chart(ctxTrend, {
+        type: 'line',
+        data: {
+            labels: trendLabels,
+            datasets: [{
+                label: 'Ventas Totales ($)',
+                data: trendData,
+                borderColor: '#f39c12',
+                backgroundColor: 'rgba(243, 156, 18, 0.2)',
+                borderWidth: 2,
+                fill: true,
+                tension: 0.4
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Monto ($)'
+                    }
+                }
+            }
+        }
+    });
+
+    // 2. Payment Method Chart
+    const ctxPayment = document.getElementById('paymentMethodChart').getContext('2d');
+    new Chart(ctxPayment, {
+        type: 'doughnut',
+        data: {
+            labels: paymentLabels,
+            datasets: [{
+                data: paymentData,
+                backgroundColor: [
+                    '#27ae60', // Green
+                    '#2980b9', // Blue
+                    '#8e44ad', // Purple
+                    '#e74c3c'  // Red
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                }
+            }
+        }
+    });
+
+    // 3. Top Customers Chart
+    const ctxCustomer = document.getElementById('customerChart').getContext('2d');
+    new Chart(ctxCustomer, {
+        type: 'bar',
+        data: {
+            labels: customerLabels,
+            datasets: [{
+                label: 'Total Comprado ($)',
+                data: customerData,
+                backgroundColor: '#3498db',
+                borderRadius: 5
+            }]
+        },
+        options: {
+            responsive: true,
+            indexAxis: 'y', // Horizontal bar chart
+            scales: {
+                x: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}

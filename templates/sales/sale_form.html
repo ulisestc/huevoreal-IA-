@@ -1,0 +1,164 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-8">
+        <div class="card shadow">
+            <div class="card-header">
+                <h3 class="mb-0">Registrar Venta</h3>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.day.id_for_label }}" class="form-label">Fecha de Venta</label>
+                            {{ form.day }}
+                            {{ form.day.errors }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.location.id_for_label }}" class="form-label">Ubicación (Inventario)</label>
+                            {{ form.location }}
+                            {{ form.location.errors }}
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.customer.id_for_label }}" class="form-label">Cliente</label>
+                            {{ form.customer }}
+                            {{ form.customer.errors }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.payment_method.id_for_label }}" class="form-label">Método de Pago</label>
+                            {{ form.payment_method }}
+                            {{ form.payment_method.errors }}
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-12 mb-3">
+                            <label for="{{ form.sale_type.id_for_label }}" class="form-label">Tipo de Venta</label>
+                            {{ form.sale_type }}
+                            {{ form.sale_type.errors }}
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3" id="div_qty_kg">
+                            <label for="{{ form.quantity_kg.id_for_label }}" class="form-label">Cantidad (Kilos)</label>
+                            {{ form.quantity_kg }}
+                            {{ form.quantity_kg.errors }}
+                        </div>
+                        <div class="col-md-6 mb-3" id="div_qty_piece">
+                            <label for="{{ form.quantity_piece.id_for_label }}" class="form-label" id="label_qty_piece">Cantidad (Piezas)</label>
+                            {{ form.quantity_piece }}
+                            {{ form.quantity_piece.errors }}
+                            <div class="form-text" id="help_qty_piece" style="display:none;">Ingrese la cantidad de huevos que equivalen a los kilos vendidos para descontar del inventario.</div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.unit_price.id_for_label }}" class="form-label">Precio Unitario</label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                {{ form.unit_price }}
+                            </div>
+                            {{ form.unit_price.errors }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.price.id_for_label }}" class="form-label">Precio Total (Calculado)</label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                {{ form.price }}
+                            </div>
+                            {{ form.price.errors }}
+                        </div>
+                    </div>
+
+                    <div class="row">
+                         <div class="col-md-6 mb-3">
+                            <label for="{{ form.amount_paid.id_for_label }}" class="form-label">Monto Pagado</label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                {{ form.amount_paid }}
+                            </div>
+                            {{ form.amount_paid.errors }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.payment_date.id_for_label }}" class="form-label">Fecha de Pago</label>
+                            {{ form.payment_date }}
+                            {{ form.payment_date.errors }}
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2 mt-4">
+                        <button type="submit" class="btn btn-primary btn-lg">Guardar Venta</button>
+                        <a href="{% url 'sale_list' %}" class="btn btn-secondary btn-lg">Cancelar</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const saleTypeSelect = document.getElementById('id_sale_type');
+        const qtyKgDiv = document.getElementById('div_qty_kg');
+        const qtyPieceDiv = document.getElementById('div_qty_piece');
+        const qtyKgInput = document.getElementById('id_quantity_kg');
+        const qtyPieceInput = document.getElementById('id_quantity_piece');
+        const unitPriceInput = document.getElementById('id_unit_price');
+        const totalPriceInput = document.getElementById('id_price');
+        const labelQtyPiece = document.getElementById('label_qty_piece');
+        const helpQtyPiece = document.getElementById('help_qty_piece');
+
+        function toggleFields() {
+            if (saleTypeSelect.value === 'KILO') {
+                // Modo Kilo: Mostramos ambos inputs.
+                // Kilos para calcular precio, Piezas para inventario.
+                qtyKgDiv.style.display = 'block';
+                qtyPieceDiv.style.display = 'block';
+                
+                labelQtyPiece.innerText = 'Equivalente en Piezas (para Inventario)';
+                helpQtyPiece.style.display = 'block';
+            } else {
+                // Modo Pieza: Solo mostramos piezas.
+                qtyKgDiv.style.display = 'none';
+                qtyPieceDiv.style.display = 'block';
+                qtyKgInput.value = '';
+                
+                labelQtyPiece.innerText = 'Cantidad (Piezas)';
+                helpQtyPiece.style.display = 'none';
+            }
+            calculateTotal();
+        }
+
+        function calculateTotal() {
+            let qty = 0;
+            if (saleTypeSelect.value === 'KILO') {
+                qty = parseFloat(qtyKgInput.value) || 0;
+            } else {
+                qty = parseFloat(qtyPieceInput.value) || 0;
+            }
+            
+            let price = parseFloat(unitPriceInput.value) || 0;
+            let total = qty * price;
+            
+            totalPriceInput.value = total.toFixed(2);
+        }
+
+        // Initial setup
+        toggleFields();
+
+        // Listeners
+        saleTypeSelect.addEventListener('change', toggleFields);
+        qtyKgInput.addEventListener('input', calculateTotal);
+        qtyPieceInput.addEventListener('input', calculateTotal);
+        unitPriceInput.addEventListener('input', calculateTotal);
+    });
+</script>
+{% endblock %}

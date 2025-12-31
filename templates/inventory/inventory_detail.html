@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="mb-3">
+    <a href="{% url 'location_list' %}" class="btn btn-outline-secondary btn-sm"><i class="fas fa-arrow-left"></i> Volver</a>
+</div>
+
+<div class="card shadow mb-4">
+    <div class="card-body text-center">
+        <h2 class="card-title">{{ location.name }}</h2>
+        <h3 class="display-4 text-primary font-weight-bold">
+            {% if inventory %}
+                {{ inventory.quantity }}
+            {% else %}
+                0
+            {% endif %}
+        </h3>
+        <p class="text-muted">Cantidad Actual</p>
+    </div>
+</div>
+
+<h3 class="mb-3">Historial de Movimientos</h3>
+<div class="card shadow-sm">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Tipo</th>
+                        <th>Cantidad</th>
+                        <th>Merma</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for movement in movements %}
+                        <tr>
+                            <td>{{ movement.date|date:"d/m/Y H:i" }}</td>
+                            <td>
+                                {% if movement.movement_type == 'PRODUCCION' %}
+                                    <span class="badge bg-success">Producción</span>
+                                {% elif movement.movement_type == 'VENTA' %}
+                                    <span class="badge bg-primary">Venta</span>
+                                {% elif movement.movement_type == 'MERMA' %}
+                                    <span class="badge bg-danger">Merma</span>
+                                {% else %}
+                                    {{ movement.get_movement_type_display }}
+                                {% endif %}
+                            </td>
+                            <td>{{ movement.quantity }}</td>
+                            <td>{{ movement.merma }}</td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="4" class="text-center py-4">No hay movimientos registrados.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

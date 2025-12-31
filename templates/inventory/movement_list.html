@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="mb-3 text-center text-md-start">
+    <h2>Movimientos de Inventario</h2>
+</div>
+<div class="mb-4 text-center text-md-start">
+    <a href="{% url 'movement_create' %}" class="btn btn-success me-2"><i class="fas fa-plus"></i> Producción</a>
+    <a href="{% url 'transfer_create' %}" class="btn btn-info text-white"><i class="fas fa-exchange-alt"></i> Traspaso</a>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Ubicación</th>
+                        <th>Tipo</th>
+                        <th>Cantidad</th>
+                        <th>Merma</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for movement in movements %}
+                        <tr>
+                            <td>{{ movement.date|date:"d/m/Y H:i" }}</td>
+                            <td>{{ movement.location.name }}</td>
+                            <td>
+                                {% if movement.movement_type == 'PRODUCCION' %}
+                                    <span class="badge bg-success">Producción</span>
+                                {% elif movement.movement_type == 'VENTA' %}
+                                    <span class="badge bg-primary">Venta</span>
+                                {% elif movement.movement_type == 'TRASPASO_ENTRADA' %}
+                                    <span class="badge bg-info text-dark">Traspaso (Entrada)</span>
+                                {% elif movement.movement_type == 'TRASPASO_SALIDA' %}
+                                    <span class="badge bg-warning text-dark">Traspaso (Salida)</span>
+                                {% else %}
+                                    {{ movement.get_movement_type_display }}
+                                {% endif %}
+                            </td>
+                            <td>{{ movement.quantity }}</td>
+                            <td>{{ movement.merma }}</td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="5" class="text-center py-4">No hay movimientos registrados.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
