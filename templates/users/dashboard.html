@@ -14,42 +14,51 @@
 
 <div class="row mt-4">
     <div class="col-md-4">
-        <div class="card text-center">
+        <div class="card text-center mb-4 shadow-sm">
             <div class="card-body">
                 <i class="fas fa-boxes fa-3x text-warning mb-3"></i>
                 <h5 class="card-title">Inventario</h5>
-                <p class="card-text">Gestiona ubicaciones y movimientos de producto.</p>
-                <a href="{% url 'location_list' %}" class="btn btn-primary">Ir a Inventario</a>
+                <p class="card-text">Gestiona ubicaciones y existencias.</p>
+                <div class="d-grid gap-2">
+                    <a href="{% url 'location_list' %}" class="btn btn-outline-primary">Ubicaciones</a>
+                    <a href="{% url 'movement_list' %}" class="btn btn-primary">Movimientos</a>
+                </div>
             </div>
         </div>
     </div>
     <div class="col-md-4">
-        <div class="card text-center">
+        <div class="card text-center mb-4 shadow-sm">
             <div class="card-body">
                 <i class="fas fa-users fa-3x text-info mb-3"></i>
                 <h5 class="card-title">Clientes</h5>
                 <p class="card-text">Administra tu cartera de clientes.</p>
-                <a href="{% url 'customer_list' %}" class="btn btn-primary">Ir a Clientes</a>
+                <div class="d-grid">
+                    <a href="{% url 'customer_list' %}" class="btn btn-primary">Ir a Clientes</a>
+                </div>
             </div>
         </div>
     </div>
     <div class="col-md-4">
-        <div class="card text-center">
+        <div class="card text-center mb-4 shadow-sm">
             <div class="card-body">
                 <i class="fas fa-shopping-cart fa-3x text-success mb-3"></i>
                 <h5 class="card-title">Ventas</h5>
                 <p class="card-text">Registra y consulta las ventas realizadas.</p>
-                <a href="{% url 'sale_list' %}" class="btn btn-primary">Ir a Ventas</a>
+                <div class="d-grid">
+                    <a href="{% url 'sale_list' %}" class="btn btn-primary">Ir a Ventas</a>
+                </div>
             </div>
         </div>
     </div>
-    <div class="col-md-4 mt-3 mt-md-0">
-        <div class="card text-center">
+    <div class="col-md-4">
+        <div class="card text-center mb-4 shadow-sm">
             <div class="card-body">
                 <i class="fas fa-chart-pie fa-3x text-danger mb-3"></i>
                 <h5 class="card-title">Estadísticas</h5>
                 <p class="card-text">Visualiza el desempeño del negocio.</p>
-                <a href="{% url 'statistics' %}" class="btn btn-primary">Ver Gráficas</a>
+                <div class="d-grid">
+                    <a href="{% url 'statistics' %}" class="btn btn-primary">Ver Gráficas</a>
+                </div>
             </div>
         </div>
     </div>

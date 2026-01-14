@@ -1,17 +1,47 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="mb-3 text-center text-md-start">
+<div class="d-flex justify-content-between align-items-center mb-3">
     <h2>Ventas</h2>
-</div>
-<div class="mb-4 text-center text-md-start">
     <a href="{% url 'sale_create' %}" class="btn btn-primary"><i class="fas fa-plus"></i> Nueva Venta</a>
+</div>
+
+<div class="card mb-4">
+    <div class="card-body">
+        <div class="d-flex justify-content-between">
+            <form method="get" class="d-flex gap-2 flex-grow-1 me-3">
+                <input type="text" name="q" class="form-control" placeholder="Buscar por cliente..." value="{{ request.GET.q|default:'' }}">
+                
+                <!-- Preserve status if it exists -->
+                {% if request.GET.status %}
+                    <input type="hidden" name="status" value="{{ request.GET.status }}">
+                {% endif %}
+                
+                <button type="submit" class="btn btn-outline-secondary"><i class="fas fa-search"></i> Buscar</button>
+                {% if request.GET.q %}
+                    <a href="{% url 'sale_list' %}{% if request.GET.status %}?status={{ request.GET.status }}{% endif %}" class="btn btn-outline-danger"><i class="fas fa-times"></i></a>
+                {% endif %}
+            </form>
+
+            <div>
+                {% if request.GET.status == 'pending' %}
+                    <a href="{% url 'sale_list' %}{% if request.GET.q %}?q={{ request.GET.q }}{% endif %}" class="btn btn-secondary">
+                        <i class="fas fa-list"></i> Ver Todas
+                    </a>
+                {% else %}
+                    <a href="{% url 'sale_list' %}?status=pending{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}" class="btn btn-warning text-dark">
+                        <i class="fas fa-exclamation-circle"></i> Ver Pendientes
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
 </div>
 
 <div class="card shadow-sm">
     <div class="card-body p-0">
         <div class="table-responsive">
-            <table class="table table-hover mb-0">
+            <table class="table table-hover mb-0 align-middle">
                 <thead>
                     <tr>
                         <th>Fecha</th>
@@ -21,7 +51,9 @@
                         <th>Precio</th>
                         <th>Total</th>
                         <th>Pago</th>
+                        <th>Estatus</th>
                         <th>Vendedor</th>
+                        <th>Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -46,11 +78,23 @@
                                 <span class="badge bg-light text-dark border">{{ sale.get_payment_method_display }}</span><br>
                                 <small class="text-muted">{{ sale.payment_date|date:"d/m/Y" }}</small>
                             </td>
+                            <td>
+                                {% if sale.payment_status == 'PAGADO' %}
+                                    <span class="badge bg-success">Pagado</span>
+                                {% elif sale.payment_status == 'PARCIAL' %}
+                                    <span class="badge bg-info text-dark">Parcialmente</span>
+                                {% else %}
+                                    <span class="badge bg-warning text-dark">Pendiente</span>
+                                {% endif %}
+                            </td>
                             <td>{{ sale.seller }}</td>
+                            <td>
+                                <a href="{% url 'sale_update' sale.pk %}" class="btn btn-sm btn-outline-primary"><i class="fas fa-edit"></i></a>
+                            </td>
                         </tr>
                     {% empty %}
                         <tr>
-                            <td colspan="8" class="text-center py-4">No hay ventas registradas.</td>
+                            <td colspan="10" class="text-center py-4">No hay ventas registradas.</td>
                         </tr>
                     {% endfor %}
                 </tbody>

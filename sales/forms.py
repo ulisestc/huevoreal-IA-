@@ -4,7 +4,7 @@ from .models import Sale
 class SaleForm(forms.ModelForm):
     class Meta:
         model = Sale
-        fields = ['day', 'location', 'customer', 'sale_type', 'quantity_kg', 'quantity_piece', 'unit_price', 'price', 'amount_paid', 'payment_date', 'payment_method']
+        fields = ['day', 'location', 'customer', 'sale_type', 'quantity_kg', 'quantity_piece', 'unit_price', 'price', 'amount_paid', 'is_paid', 'payment_date', 'payment_method']
         widgets = {
             'day': forms.DateInput(attrs={'type': 'date', 'class': 'form-control form-control-lg'}),
             'payment_date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control form-control-lg'}),
@@ -17,4 +17,5 @@ class SaleForm(forms.ModelForm):
             'unit_price': forms.NumberInput(attrs={'class': 'form-control form-control-lg', 'step': '0.01', 'id': 'id_unit_price'}),
             'price': forms.NumberInput(attrs={'class': 'form-control form-control-lg', 'step': '0.01', 'readonly': 'readonly', 'id': 'id_price'}),
             'amount_paid': forms.NumberInput(attrs={'class': 'form-control form-control-lg', 'step': '0.01'}),
+            'is_paid': forms.CheckboxInput(attrs={'class': 'form-check-input', 'style': 'width: 25px; height: 25px;'}),
         }

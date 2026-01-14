@@ -33,13 +33,48 @@
 
 <div class="row">
     <!-- Top Clientes -->
-    <div class="col-lg-12 mb-4">
+    <div class="col-lg-6 mb-4">
         <div class="card shadow">
             <div class="card-header bg-info text-white">
                 <h5 class="mb-0"><i class="fas fa-users"></i> Top 5 Clientes</h5>
             </div>
             <div class="card-body">
                 <canvas id="customerChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Ventas por Vendedor (Tabla) -->
+    <div class="col-lg-6 mb-4">
+        <div class="card shadow">
+            <div class="card-header bg-warning text-dark">
+                <h5 class="mb-0"><i class="fas fa-user-tie"></i> Ventas por Vendedor (Mensual)</h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-striped mb-0">
+                        <thead>
+                            <tr>
+                                <th>Mes</th>
+                                <th>Vendedor</th>
+                                <th class="text-end">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for entry in seller_sales %}
+                                <tr>
+                                    <td>{{ entry.month|date:"F Y" }}</td>
+                                    <td>{{ entry.seller__username }}</td>
+                                    <td class="text-end">${{ entry.total|floatformat:2 }}</td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="3" class="text-center">No hay datos disponibles.</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>

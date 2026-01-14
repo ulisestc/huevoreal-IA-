@@ -6,6 +6,7 @@ from .forms import InventoryMovementForm
 from django import forms
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import transaction
+from django.db.models import Q
 
 class LocationListView(LoginRequiredMixin, ListView):
     model = Location
@@ -35,6 +36,16 @@ class InventoryMovementListView(LoginRequiredMixin, ListView):
     context_object_name = 'movements'
     ordering = ['-date']
 
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        q = self.request.GET.get('q')
+        if q:
+            queryset = queryset.filter(
+                Q(location__name__icontains=q) | 
+                Q(movement_type__icontains=q)
+            )
+        return queryset
+
 class InventoryMovementCreateView(LoginRequiredMixin, CreateView):
     model = InventoryMovement
     form_class = InventoryMovementForm
@@ -58,7 +69,7 @@ class InventoryMovementCreateView(LoginRequiredMixin, CreateView):
 class TransferForm(forms.Form):
     source_location = forms.ModelChoiceField(queryset=Location.objects.all(), label="Desde", widget=forms.Select(attrs={'class': 'form-select form-select-lg'}))
     dest_location = forms.ModelChoiceField(queryset=Location.objects.all(), label="Hacia", widget=forms.Select(attrs={'class': 'form-select form-select-lg'}))
-    quantity = forms.DecimalField(max_digits=10, decimal_places=2, label="Cantidad", widget=forms.NumberInput(attrs={'class': 'form-control form-control-lg'}))
+    quantity = forms.IntegerField(label="Cantidad", widget=forms.NumberInput(attrs={'class': 'form-control form-control-lg'}))
 
     def clean(self):
         cleaned_data = super().clean()

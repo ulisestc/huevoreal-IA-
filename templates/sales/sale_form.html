@@ -5,7 +5,7 @@
     <div class="col-md-8 col-lg-8">
         <div class="card shadow">
             <div class="card-header">
-                <h3 class="mb-0">Registrar Venta</h3>
+                <h3 class="mb-0">{% if form.instance.pk %}Editar Venta #{{ form.instance.pk }}{% else %}Registrar Venta{% endif %}</h3>
             </div>
             <div class="card-body">
                 <form method="post">
@@ -78,8 +78,8 @@
                         </div>
                     </div>
 
-                    <div class="row">
-                         <div class="col-md-6 mb-3">
+                    <div class="row align-items-center">
+                         <div class="col-md-4 mb-3">
                             <label for="{{ form.amount_paid.id_for_label }}" class="form-label">Monto Pagado</label>
                             <div class="input-group">
                                 <span class="input-group-text">$</span>
@@ -87,10 +87,19 @@
                             </div>
                             {{ form.amount_paid.errors }}
                         </div>
-                        <div class="col-md-6 mb-3">
+                        <div class="col-md-4 mb-3">
                             <label for="{{ form.payment_date.id_for_label }}" class="form-label">Fecha de Pago</label>
                             {{ form.payment_date }}
                             {{ form.payment_date.errors }}
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="form-check pt-4">
+                                {{ form.is_paid }}
+                                <label class="form-check-label fw-bold ms-2" for="{{ form.is_paid.id_for_label }}">
+                                    ¿Ya fue pagado?
+                                </label>
+                            </div>
+                            {{ form.is_paid.errors }}
                         </div>
                     </div>
 
@@ -113,24 +122,21 @@
         const qtyPieceInput = document.getElementById('id_quantity_piece');
         const unitPriceInput = document.getElementById('id_unit_price');
         const totalPriceInput = document.getElementById('id_price');
+        const amountPaidInput = document.getElementById('id_amount_paid');
+        const isPaidCheckbox = document.getElementById('id_is_paid');
         const labelQtyPiece = document.getElementById('label_qty_piece');
         const helpQtyPiece = document.getElementById('help_qty_piece');
 
         function toggleFields() {
             if (saleTypeSelect.value === 'KILO') {
-                // Modo Kilo: Mostramos ambos inputs.
-                // Kilos para calcular precio, Piezas para inventario.
                 qtyKgDiv.style.display = 'block';
                 qtyPieceDiv.style.display = 'block';
-                
                 labelQtyPiece.innerText = 'Equivalente en Piezas (para Inventario)';
                 helpQtyPiece.style.display = 'block';
             } else {
-                // Modo Pieza: Solo mostramos piezas.
                 qtyKgDiv.style.display = 'none';
                 qtyPieceDiv.style.display = 'block';
                 qtyKgInput.value = '';
-                
                 labelQtyPiece.innerText = 'Cantidad (Piezas)';
                 helpQtyPiece.style.display = 'none';
             }
@@ -149,16 +155,39 @@
             let total = qty * price;
             
             totalPriceInput.value = total.toFixed(2);
+            checkPaymentStatus();
         }
 
-        // Initial setup
+        function checkPaymentStatus() {
+            const total = parseFloat(totalPriceInput.value) || 0;
+            const paid = parseFloat(amountPaidInput.value) || 0;
+            
+            // If user explicitly unchecks, we don't force it back immediately unless numbers change
+            // But if amounts indicate partial, we should update UI or user expectation
+            // Logic: if paid < total, is_paid CANNOT be true (unless user forces it, but here we want to help)
+            // If paid >= total, is_paid should be true.
+            
+            if (paid < total && paid > 0) {
+               // Partial
+               // The requirement says "in is_paid it must say partially". 
+               // In the form, is_paid is a checkbox. We can't make a checkbox say "partially".
+               // But we can uncheck it to signify "Not Fully Paid".
+               isPaidCheckbox.checked = false; 
+            } else if (paid >= total && total > 0) {
+               isPaidCheckbox.checked = true;
+            }
+        }
+
         toggleFields();
 
-        // Listeners
         saleTypeSelect.addEventListener('change', toggleFields);
         qtyKgInput.addEventListener('input', calculateTotal);
         qtyPieceInput.addEventListener('input', calculateTotal);
         unitPriceInput.addEventListener('input', calculateTotal);
+        amountPaidInput.addEventListener('input', checkPaymentStatus);
+        
+        // Also run on load to set initial state correctly if editing
+        checkPaymentStatus();
     });
 </script>
 {% endblock %}
