@@ -1,12 +1,13 @@
 from django.views.generic import ListView, DetailView, CreateView, FormView
 from django.urls import reverse_lazy
-from django.shortcuts import redirect
+from django.shortcuts import redirect, get_object_or_404
 from .models import Location, Inventory, InventoryMovement
-from .forms import InventoryMovementForm
+from .forms import InventoryMovementForm, InventoryCorrectionForm
 from django import forms
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import transaction
 from django.db.models import Q
+from django.utils import timezone
 
 class LocationListView(LoginRequiredMixin, ListView):
     model = Location
@@ -111,3 +112,41 @@ class TransferView(LoginRequiredMixin, FormView):
             )
         
         return super().form_valid(form)
+
+class InventoryCorrectionView(LoginRequiredMixin, FormView):
+    template_name = 'inventory/correction_form.html'
+    form_class = InventoryCorrectionForm
+
+    def dispatch(self, request, *args, **kwargs):
+        self.location = get_object_or_404(Location, pk=self.kwargs['pk'])
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['location'] = self.location
+        inventory = Inventory.objects.filter(location=self.location).first()
+        context['current_quantity'] = inventory.quantity if inventory else 0
+        return context
+    
+    def form_valid(self, form):
+        real_quantity = form.cleaned_data['real_quantity']
+        inventory, _ = Inventory.objects.get_or_create(location=self.location, defaults={'quantity': 0})
+        
+        diff = real_quantity - inventory.quantity
+        
+        if diff != 0:
+            with transaction.atomic():
+                inventory.quantity = real_quantity
+                inventory.save()
+                
+                InventoryMovement.objects.create(
+                    location=self.location,
+                    quantity=diff,
+                    movement_type='CORRECCION',
+                    date=timezone.now()
+                )
+        
+        return super().form_valid(form)
+    
+    def get_success_url(self):
+        return reverse_lazy('inventory_detail', kwargs={'pk': self.location.pk})

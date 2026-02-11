@@ -16,3 +16,6 @@ class InventoryMovementForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         # Only allow PRODUCCION for manual entry. Transfers and Sales are handled elsewhere.
         self.fields['movement_type'].choices = [('PRODUCCION', 'Producción')]
+
+class InventoryCorrectionForm(forms.Form):
+    real_quantity = forms.IntegerField(label="Cantidad Real en Físico", widget=forms.NumberInput(attrs={'class': 'form-control form-control-lg'}))

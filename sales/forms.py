@@ -1,7 +1,12 @@
 from django import forms
 from .models import Sale
+from customers.models import Customer
 
 class SaleForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(SaleForm, self).__init__(*args, **kwargs)
+        self.fields['customer'].queryset = Customer.objects.all().order_by('name')
+
     class Meta:
         model = Sale
         fields = ['day', 'location', 'customer', 'sale_type', 'quantity_kg', 'quantity_piece', 'unit_price', 'price', 'amount_paid', 'is_paid', 'payment_date', 'payment_method']

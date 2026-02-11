@@ -9,4 +9,5 @@ urlpatterns = [
     path('movements/', views.InventoryMovementListView.as_view(), name='movement_list'),
     path('movements/create/', views.InventoryMovementCreateView.as_view(), name='movement_create'),
     path('movements/transfer/', views.TransferView.as_view(), name='transfer_create'),
+    path('location/<int:pk>/correct/', views.InventoryCorrectionView.as_view(), name='inventory_correction'),
 ]

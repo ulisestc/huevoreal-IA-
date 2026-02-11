@@ -27,6 +27,7 @@ class InventoryMovement(models.Model):
         ('VENTA', 'Venta'),
         ('TRASPASO_ENTRADA', 'Traspaso (Entrada)'),
         ('TRASPASO_SALIDA', 'Traspaso (Salida)'),
+        ('CORRECCION', 'Corrección de Inventario'),
     )
     location = models.ForeignKey(Location, on_delete=models.CASCADE, verbose_name="Ubicación")
     quantity = models.IntegerField(verbose_name="Cantidad")

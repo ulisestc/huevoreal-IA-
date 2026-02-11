@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'inventory',
     'customers',
     'sales',
+    'expenses',
 ]
 
 MIDDLEWARE = [
@@ -114,11 +115,16 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'es-mx'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'America/Mexico_City'
 
 USE_I18N = True
 
 USE_TZ = True
+
+# Date Formats
+DATE_FORMAT = 'd/m/Y'
+DATE_INPUT_FORMATS = ['%d/%m/%Y']
+
 
 
 # Static files (CSS, JavaScript, Images)
