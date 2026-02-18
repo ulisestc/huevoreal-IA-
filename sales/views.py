@@ -1,3 +1,4 @@
+import calendar
 from django.views.generic import ListView, CreateView, TemplateView, UpdateView
 from django.urls import reverse_lazy
 from .models import Sale
@@ -12,12 +13,14 @@ from django.utils import timezone
 import json
 from django.core.serializers.json import DjangoJSONEncoder
 from expenses.models import Expense
+from django.contrib.auth import get_user_model # Import get_user_model
 
 class SaleListView(LoginRequiredMixin, ListView):
     model = Sale
     template_name = 'sales/sale_list.html'
     context_object_name = 'sales'
     ordering = ['-day']
+    paginate_by = 10
 
     def get_queryset(self):
         queryset = super().get_queryset()
@@ -34,11 +37,23 @@ class SaleListView(LoginRequiredMixin, ListView):
         status = self.request.GET.get('status')
         if status == 'pending':
             # Filter sales that are NOT marked as paid AND where amount_paid < price
-            queryset = queryset.filter(
+            queryset = queryset = queryset.filter(
                 Q(is_paid=False) & Q(amount_paid__lt=models.F('price'))
             )
+
+        # Seller filter
+        seller_id = self.request.GET.get('seller')
+        if seller_id and seller_id.isdigit():
+            queryset = queryset.filter(seller_id=seller_id)
             
         return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        User = get_user_model()
+        context['sellers'] = User.objects.all()
+        context['selected_seller'] = self.request.GET.get('seller', '')
+        return context
 
 class SaleCreateView(LoginRequiredMixin, CreateView):
     model = Sale
@@ -161,7 +176,10 @@ class StatisticsView(LoginRequiredMixin, TemplateView):
             .aggregate(Sum('amount'))['amount__sum'] or 0
             
         net_profit_month = total_sales_month - total_expenses_month
-
+        
+        context['total_sales_month'] = total_sales_month
+        context['total_expenses_month'] = total_expenses_month
+        context['net_profit_month'] = net_profit_month
         context['trend_labels'] = json.dumps(trend_labels, cls=DjangoJSONEncoder)
         context['trend_data'] = json.dumps(trend_data, cls=DjangoJSONEncoder)
         context['payment_labels'] = json.dumps(payment_labels, cls=DjangoJSONEncoder)
@@ -169,9 +187,59 @@ class StatisticsView(LoginRequiredMixin, TemplateView):
         context['customer_labels'] = json.dumps(customer_labels, cls=DjangoJSONEncoder)
         context['customer_data'] = json.dumps(customer_data, cls=DjangoJSONEncoder)
         context['seller_sales'] = seller_sales
+
+        # 6. Monthly Financial Report (Last 12 months)
+        monthly_financial_data = []
+        monthly_category_expenses = {} # For expense categories chart
+
+        for i in range(12):
+            # Calculate month_start and month_end more robustly
+            current_month = end_date.replace(day=1) - timedelta(days=i*30) # Approximate start
+            current_month = current_month.replace(day=1) # Ensure it's the first day of the month
+
+            month_start = current_month
+            month_end = current_month.replace(day=calendar.monthrange(current_month.year, current_month.month)[1])
+
+            # Total Sales for the month
+            sales_in_month = Sale.objects.filter(day__range=[month_start, month_end])\
+                .aggregate(Sum('price'))['price__sum'] or 0
+            
+            # Total Expenses for the month
+            expenses_in_month = Expense.objects.filter(date__range=[month_start, month_end])\
+                .aggregate(Sum('amount'))['amount__sum'] or 0
+            
+            net_profit_in_month = sales_in_month - expenses_in_month
+
+            # Expense categories for the month
+            category_expenses = Expense.objects.filter(date__range=[month_start, month_end])\
+                .values('category')\
+                .annotate(total=Sum('amount'))
+            
+            # Spanish month names
+            month_name = {
+                1: 'Enero', 2: 'Febrero', 3: 'Marzo', 4: 'Abril', 
+                5: 'Mayo', 6: 'Junio', 7: 'Julio', 8: 'Agosto', 
+                9: 'Septiembre', 10: 'Octubre', 11: 'Noviembre', 12: 'Diciembre'
+            }[month_start.month]
+            
+            month_label = f"{month_name} {month_start.year}"
+
+            monthly_financial_data.append({
+                'month': month_label,
+                'total_sales': sales_in_month,
+                'total_expenses': expenses_in_month,
+                'net_profit': net_profit_in_month,
+            })
+
+            # Populate monthly_category_expenses for the chart
+            monthly_category_expenses[month_label] = {
+                entry['category']: float(entry['total']) for entry in category_expenses
+            }
         
-        context['total_sales_month'] = total_sales_month
-        context['total_expenses_month'] = total_expenses_month
-        context['net_profit_month'] = net_profit_month
+        # Reverse to show from oldest to newest
+        monthly_financial_data.reverse() 
+        context['monthly_financial_data'] = monthly_financial_data
+        context['monthly_financial_json'] = json.dumps(monthly_financial_data, cls=DjangoJSONEncoder)
+        context['monthly_category_expenses'] = json.dumps(monthly_category_expenses, cls=DjangoJSONEncoder)
 
         return context

@@ -9,6 +9,7 @@ class CustomerListView(LoginRequiredMixin, ListView):
     template_name = 'customers/customer_list.html'
     context_object_name = 'customers'
     ordering = ['name']
+    paginate_by = 10
 
     def get_queryset(self):
         queryset = super().get_queryset()

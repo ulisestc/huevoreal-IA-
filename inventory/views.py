@@ -13,6 +13,7 @@ class LocationListView(LoginRequiredMixin, ListView):
     model = Location
     template_name = 'inventory/location_list.html'
     context_object_name = 'locations'
+    paginate_by = 10
 
 class LocationCreateView(LoginRequiredMixin, CreateView):
     model = Location
@@ -36,6 +37,7 @@ class InventoryMovementListView(LoginRequiredMixin, ListView):
     template_name = 'inventory/movement_list.html'
     context_object_name = 'movements'
     ordering = ['-date']
+    paginate_by = 10
 
     def get_queryset(self):
         queryset = super().get_queryset()

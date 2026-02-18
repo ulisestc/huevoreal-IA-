@@ -121,6 +121,68 @@
             </div>
         </div>
     </div>
+    
+    <!-- Reporte Financiero Mensual -->
+    <div class="col-lg-6 mb-4">
+        <div class="card shadow h-100">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0"><i class="fas fa-chart-pie"></i> Reporte Financiero Mensual</h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-striped mb-0">
+                        <thead>
+                            <tr>
+                                <th>Mes</th>
+                                <th class="text-end">Ventas</th>
+                                <th class="text-end">Gastos</th>
+                                <th class="text-end">Utilidad</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for month_data in monthly_financial_data %}
+                                {% if month_data.total_sales != 0 or month_data.total_expenses != 0 %}
+                                <tr>
+                                    <td>{{ month_data.month }}</td>
+                                    <td class="text-end text-success">${{ month_data.total_sales|floatformat:2 }}</td>
+                                    <td class="text-end text-danger">-${{ month_data.total_expenses|floatformat:2 }}</td>
+                                    <td class="text-end fw-bold {% if month_data.net_profit >= 0 %}text-primary{% else %}text-danger{% endif %}">${{ month_data.net_profit|floatformat:2 }}</td>
+                                </tr>
+                                {% endif %}
+                            {% empty %}
+                                <tr>
+                                    <td colspan="4" class="text-center">No hay datos financieros disponibles.</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gastos por Categoría Mensual -->
+    <div class="col-lg-6 mb-4">
+        <div class="card shadow h-100">
+            <div class="card-header bg-danger text-white">
+                <h5 class="mb-0"><i class="fas fa-chart-bar"></i> Gastos por Categoría</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <select id="expenseMonthSelector" class="form-select form-select-sm">
+                        {% for month_data in monthly_financial_data %}
+                            {% if month_data.total_expenses > 0 %}
+                                <option value="{{ month_data.month }}">{{ month_data.month }}</option>
+                            {% endif %}
+                        {% endfor %}
+                    </select>
+                </div>
+                <div style="max-height: 300px; position: relative; margin: auto;">
+                    <canvas id="expenseCategoryChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <!-- Chart.js CDN -->
@@ -128,12 +190,15 @@
 
 <script>
     // Data from Django
-    const trendLabels = JSON.parse('{{ trend_labels|safe }}');
-    const trendData = JSON.parse('{{ trend_data|safe }}');
-    const paymentLabels = JSON.parse('{{ payment_labels|safe }}');
-    const paymentData = JSON.parse('{{ payment_data|safe }}');
-    const customerLabels = JSON.parse('{{ customer_labels|safe }}');
-    const customerData = JSON.parse('{{ customer_data|safe }}');
+    const trendLabels = JSON.parse('{{ trend_labels|default:"[]"|safe }}');
+    const trendData = JSON.parse('{{ trend_data|default:"[]"|safe }}');
+    const paymentLabels = JSON.parse('{{ payment_labels|default:"[]"|safe }}');
+    const paymentData = JSON.parse('{{ payment_data|default:"[]"|safe }}');
+    const customerLabels = JSON.parse('{{ customer_labels|default:"[]"|safe }}');
+    const customerData = JSON.parse('{{ customer_data|default:"[]"|safe }}');
+    const monthlyFinancialData = JSON.parse('{{ monthly_financial_json|default:"[]"|safe }}');
+    const monthlyCategoryExpenses = JSON.parse('{{ monthly_category_expenses|default:"{}"|safe }}');
+
 
     // 1. Sales Trend Chart
     const ctxTrend = document.getElementById('salesTrendChart').getContext('2d');
@@ -213,6 +278,58 @@
                 }
             }
         }
+    });
+
+    // 4. Expense Category Chart
+    const expenseMonthSelector = document.getElementById('expenseMonthSelector');
+    const ctxExpenseCategory = document.getElementById('expenseCategoryChart').getContext('2d');
+    let expenseCategoryChart; // Declare chart variable
+
+    function renderExpenseCategoryChart(month) {
+        const categoriesData = monthlyCategoryExpenses[month] || {};
+        const labels = Object.keys(categoriesData);
+        const data = Object.values(categoriesData);
+
+        if (expenseCategoryChart) {
+            expenseCategoryChart.destroy(); // Destroy previous chart instance
+        }
+
+        expenseCategoryChart = new Chart(ctxExpenseCategory, {
+            type: 'pie', // Using pie chart for categories
+            data: {
+                labels: labels,
+                datasets: [{
+                    data: data,
+                    backgroundColor: [
+                        '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9900', '#C9CBCF', '#7B7B7B'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    title: {
+                        display: true,
+                        text: `Gastos por Categoría - ${month}`
+                    }
+                }
+            }
+        });
+    }
+
+    // Initialize with the latest month (last item in monthlyFinancialData)
+    if (monthlyFinancialData.length > 0) {
+        const latestMonth = monthlyFinancialData[monthlyFinancialData.length - 1].month;
+        expenseMonthSelector.value = latestMonth; // Set dropdown to latest month
+        renderExpenseCategoryChart(latestMonth);
+    }
+
+    // Update chart on month selection change
+    expenseMonthSelector.addEventListener('change', (event) => {
+        renderExpenseCategoryChart(event.target.value);
     });
 </script>
 {% endblock %}
