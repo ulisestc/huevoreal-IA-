@@ -11,8 +11,8 @@ class SaleForm(forms.ModelForm):
         model = Sale
         fields = ['day', 'location', 'customer', 'sale_type', 'quantity_kg', 'quantity_piece', 'unit_price', 'price', 'amount_paid', 'is_paid', 'payment_date', 'payment_method']
         widgets = {
-            'day': forms.DateInput(attrs={'type': 'date', 'class': 'form-control form-control-lg'}),
-            'payment_date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control form-control-lg'}),
+            'day': forms.DateInput(attrs={'type': 'date', 'class': 'form-control form-control-lg'}, format='%Y-%m-%d'),
+            'payment_date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control form-control-lg'}, format='%Y-%m-%d'),
             'location': forms.Select(attrs={'class': 'form-select form-select-lg'}),
             'customer': forms.Select(attrs={'class': 'form-select form-select-lg'}),
             'sale_type': forms.Select(attrs={'class': 'form-select form-select-lg', 'id': 'id_sale_type'}),
