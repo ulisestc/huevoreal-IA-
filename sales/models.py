@@ -49,3 +49,38 @@ class Sale(models.Model):
             return 'PARCIAL'
         else:
             return 'PENDIENTE'
+
+class Order(models.Model):
+    ORDER_STATUS_CHOICES = (
+        ('PENDIENTE', 'Pendiente'),
+        ('COMPLETADO', 'Completado'),
+        ('CANCELADO', 'Cancelado'),
+    )
+    SALE_TYPE_CHOICES = (
+        ('KILO', 'Kilo'),
+        ('PIEZA', 'Pieza'),
+    )
+    PAYMENT_METHOD_CHOICES = (
+        ('EFECTIVO', 'Efectivo'),
+        ('TRANSFERENCIA', 'Transferencia'),
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Fecha de Creación")
+    customer = models.ForeignKey(Customer, on_delete=models.CASCADE, verbose_name="Cliente")
+    location = models.ForeignKey(Location, on_delete=models.CASCADE, null=True, verbose_name="Ubicación")
+    sale_type = models.CharField(max_length=5, choices=SALE_TYPE_CHOICES, verbose_name="Tipo de Venta")
+    quantity_kg = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, verbose_name="Cantidad (Kg)")
+    quantity_piece = models.IntegerField(null=True, blank=True, verbose_name="Cantidad (Piezas)")
+    unit_price = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name="Precio Unitario")
+    total_price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Total")
+    payment_method = models.CharField(max_length=15, choices=PAYMENT_METHOD_CHOICES, default='EFECTIVO', verbose_name="Método de Pago")
+    status = models.CharField(max_length=15, choices=ORDER_STATUS_CHOICES, default='PENDIENTE', verbose_name="Estado")
+    seller = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, verbose_name="Vendedor")
+
+    class Meta:
+        verbose_name = "Pedido"
+        verbose_name_plural = "Pedidos"
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f'Pedido #{self.id} - {self.customer}'

@@ -1,5 +1,5 @@
 from django import forms
-from .models import Sale
+from .models import Sale, Order
 from customers.models import Customer
 
 class SaleForm(forms.ModelForm):
@@ -23,4 +23,23 @@ class SaleForm(forms.ModelForm):
             'price': forms.NumberInput(attrs={'class': 'form-control form-control-lg', 'step': '0.01', 'readonly': 'readonly', 'id': 'id_price'}),
             'amount_paid': forms.NumberInput(attrs={'class': 'form-control form-control-lg', 'step': '0.01'}),
             'is_paid': forms.CheckboxInput(attrs={'class': 'form-check-input', 'style': 'width: 25px; height: 25px;'}),
+        }
+
+class OrderForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(OrderForm, self).__init__(*args, **kwargs)
+        self.fields['customer'].queryset = Customer.objects.all().order_by('name')
+
+    class Meta:
+        model = Order
+        fields = ['customer', 'location', 'sale_type', 'quantity_kg', 'quantity_piece', 'unit_price', 'total_price', 'payment_method']
+        widgets = {
+            'customer': forms.Select(attrs={'class': 'form-select form-select-lg'}),
+            'location': forms.Select(attrs={'class': 'form-select form-select-lg'}),
+            'sale_type': forms.Select(attrs={'class': 'form-select form-select-lg', 'id': 'id_sale_type'}),
+            'payment_method': forms.Select(attrs={'class': 'form-select form-select-lg'}),
+            'quantity_kg': forms.NumberInput(attrs={'class': 'form-control form-control-lg', 'step': '0.01', 'id': 'id_quantity_kg'}),
+            'quantity_piece': forms.NumberInput(attrs={'class': 'form-control form-control-lg', 'id': 'id_quantity_piece'}),
+            'unit_price': forms.NumberInput(attrs={'class': 'form-control form-control-lg', 'step': '0.01', 'id': 'id_unit_price'}),
+            'total_price': forms.NumberInput(attrs={'class': 'form-control form-control-lg', 'step': '0.01', 'readonly': 'readonly', 'id': 'id_price'}),
         }

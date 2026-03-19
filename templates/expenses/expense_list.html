@@ -36,6 +36,7 @@
                         <th>Fecha</th>
                         <th>Descripción</th>
                         <th>Categoría</th>
+                        <th>Pago</th>
                         <th>Monto</th>
                         <th>Registrado Por</th>
                         <th>Acciones</th>
@@ -47,6 +48,7 @@
                             <td>{{ expense.date|date:"d/m/Y" }}</td>
                             <td>{{ expense.description }}</td>
                             <td><span class="badge bg-secondary">{{ expense.get_category_display }}</span></td>
+                            <td><span class="badge bg-light text-dark border">{{ expense.get_payment_method_display }}</span></td>
                             <td class="text-danger">-${{ expense.amount }}</td>
                             <td>{{ expense.user }}</td>
                             <td>
