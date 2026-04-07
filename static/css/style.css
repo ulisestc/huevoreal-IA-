@@ -146,26 +146,71 @@ h2 {
     margin-bottom: 1.5rem;
 }
 
-/* Mobile */
+/* Mobile Optimization */
 @media (max-width: 768px) {
-    .container {
+    body {
+        font-size: 16px;
+    }
+
+    .container, .container-fluid {
         padding-left: 1rem;
         padding-right: 1rem;
     }
+/* Typography */
+h2 {
+    font-size: 1.5rem;
+    text-align: center;
+    margin-bottom: 1rem;
+}
 
-    h2 {
-        font-size: 1.75rem;
-        text-align: center;
-    }
-    
-    .btn {
-        width: 100%;
-        margin-right: 0;
-    }
-    
-    /* Ensure table text is readable without being too huge on mobile */
+.btn:not(.btn-sm) {
+    width: 100%;
+    margin-right: 0;
+    margin-bottom: 0.75rem;
+    padding: 12px; /* Larger tap target */
+}
+
+/* Table Improvements for Mobile */
+.table-responsive {
+    border: 0;
+    margin-bottom: 2rem;
+}
+
     .table th, .table td {
-        padding: 0.75rem;
-        font-size: 1rem;
+        padding: 0.75rem 0.5rem;
+        font-size: 0.9rem;
     }
+
+    /* Cards on mobile */
+    .card-body {
+        padding: 1rem;
+    }
+
+    /* Forms on mobile */
+    .form-control, .form-select {
+        font-size: 16px; /* Prevents iOS zoom on focus */
+        padding: 0.8rem;
+    }
+
+    /* Navbar on mobile */
+    .navbar-brand {
+        font-size: 1.25rem;
+    }
+
+    .nav-link {
+        padding: 12px 0 !important;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+}
+
+/* Custom Scrollbar for responsive tables to make them more obvious */
+.table-responsive::-webkit-scrollbar {
+    height: 6px;
+}
+.table-responsive::-webkit-scrollbar-thumb {
+    background: var(--secondary-color);
+    border-radius: 10px;
+}
+.table-responsive::-webkit-scrollbar-track {
+    background: #eee;
 }

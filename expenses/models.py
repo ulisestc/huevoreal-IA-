@@ -8,12 +8,14 @@ class Expense(models.Model):
         ('SUELDOS', 'Sueldos'),
         ('TRANSPORTE', 'Transporte'),
         ('MANTENIMIENTO', 'Mantenimiento'),
+        ('TARJETA_CREDITO', 'Tarjeta de Crédito'),
         ('OTROS', 'Otros'),
     )
 
     PAYMENT_METHOD_CHOICES = (
         ('EFECTIVO', 'Efectivo'),
         ('TRANSFERENCIA', 'Transferencia'),
+        ('TARJETA_CREDITO', 'Tarjeta de Crédito'),
     )
 
     description = models.CharField(max_length=255, verbose_name="Descripción")

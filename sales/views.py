@@ -214,33 +214,45 @@ class StatisticsView(LoginRequiredMixin, TemplateView):
         context['seller_sales'] = seller_sales
         context['view_date'] = view_date
 
-        # Available Months for Dropdown (Last 12 months)
+        # Available Months for Dropdown (Only months with data)
+        # Get months with sales
+        sales_months = Sale.objects.annotate(month=TruncMonth('day')).values_list('month', flat=True).distinct()
+        # Get months with expenses
+        expenses_months = Expense.objects.annotate(month=TruncMonth('date')).values_list('month', flat=True).distinct()
+        
+        # Combine and sort
+        all_months = sorted(list(set(list(sales_months) + list(expenses_months))), reverse=True)
+        
+        # Ensure current month is always included if not present
+        current_month = timezone.now().date().replace(day=1)
+        if current_month not in all_months:
+            all_months.insert(0, current_month)
+            all_months.sort(reverse=True)
+
         available_months = []
-        today = timezone.now().date()
-        for i in range(12):
-            # Better month iteration
-            m = today.month - i
-            y = today.year
-            while m <= 0:
-                m += 12
-                y -= 1
-            d = date(y, m, 1)
-            month_name_es = {
-                1: 'Enero', 2: 'Febrero', 3: 'Marzo', 4: 'Abril', 
-                5: 'Mayo', 6: 'Junio', 7: 'Julio', 8: 'Agosto', 
-                9: 'Septiembre', 10: 'Octubre', 11: 'Noviembre', 12: 'Diciembre'
-            }[d.month]
-            available_months.append({
-                'value': d.strftime('%Y-%m'),
-                'label': f"{month_name_es} {d.year}"
-            })
+        month_names_es = {
+            1: 'Enero', 2: 'Febrero', 3: 'Marzo', 4: 'Abril', 
+            5: 'Mayo', 6: 'Junio', 7: 'Julio', 8: 'Agosto', 
+            9: 'Septiembre', 10: 'Octubre', 11: 'Noviembre', 12: 'Diciembre'
+        }
+
+        for d in all_months:
+            if d: # Handle potential None
+                available_months.append({
+                    'value': d.strftime('%Y-%m'),
+                    'label': f"{month_names_es[d.month]} {d.year}"
+                })
+        
         context['available_months'] = available_months
 
-        # 6. Monthly Financial Report (Last 12 months)
+        # 6. Monthly Financial Report (Show all months with data)
         monthly_financial_data = []
         monthly_category_expenses = {}
 
-        for am in reversed(available_months):
+        # Limit historical report to last 12 months with data for performance
+        report_months = available_months[:12]
+
+        for am in reversed(report_months):
             y, m = map(int, am['value'].split('-'))
             ms = date(y, m, 1)
             me = ms.replace(day=calendar.monthrange(y, m)[1])
