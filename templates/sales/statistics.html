@@ -17,42 +17,84 @@
 </div>
 
 <!-- Financial Summary -->
-<div class="row mb-4">
-    <div class="col-md-4">
+<div class="row mb-3 g-3">
+    <div class="col-6 col-md-4">
         <div class="card bg-success text-white shadow h-100">
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <h6 class="text-uppercase mb-1">Ventas ({{ view_date|date:"F" }})</h6>
-                        <h2 class="mb-0">${{ total_sales_month|floatformat:2 }}</h2>
+                        <h6 class="text-uppercase mb-1" style="font-size:0.75rem;">Ventas ({{ view_date|date:"F" }})</h6>
+                        <h3 class="mb-0">${{ total_sales_month|floatformat:2 }}</h3>
                     </div>
                     <i class="fas fa-money-bill-wave fa-2x opacity-50"></i>
                 </div>
             </div>
         </div>
     </div>
-    <div class="col-md-4">
+    <div class="col-6 col-md-4">
         <div class="card bg-danger text-white shadow h-100">
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <h6 class="text-uppercase mb-1">Gastos ({{ view_date|date:"F" }})</h6>
-                        <h2 class="mb-0">-${{ total_expenses_month|floatformat:2 }}</h2>
+                        <h6 class="text-uppercase mb-1" style="font-size:0.75rem;">Gastos ({{ view_date|date:"F" }})</h6>
+                        <h3 class="mb-0">-${{ total_expenses_month|floatformat:2 }}</h3>
                     </div>
                     <i class="fas fa-file-invoice-dollar fa-2x opacity-50"></i>
                 </div>
             </div>
         </div>
     </div>
-    <div class="col-md-4">
+    <div class="col-12 col-md-4">
         <div class="card {% if net_profit_month >= 0 %}bg-primary{% else %}bg-secondary{% endif %} text-white shadow h-100">
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <h6 class="text-uppercase mb-1">Utilidad Neta ({{ view_date|date:"F" }})</h6>
-                        <h2 class="mb-0">${{ net_profit_month|floatformat:2 }}</h2>
+                        <h6 class="text-uppercase mb-1" style="font-size:0.75rem;">Utilidad Neta ({{ view_date|date:"F" }})</h6>
+                        <h3 class="mb-0">${{ net_profit_month|floatformat:2 }}</h3>
                     </div>
                     <i class="fas fa-chart-line fa-2x opacity-50"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Egg Production & Sales Summary -->
+<div class="row mb-4 g-3">
+    <div class="col-6">
+        <div class="card text-white shadow h-100" style="background: linear-gradient(135deg, #1a6b3a, #2e8b57);">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-uppercase mb-1" style="font-size:0.75rem;">Producción ({{ view_date|date:"F" }})</h6>
+                        {% if eggs_produced_month > 0 %}
+                            <h3 class="mb-0">{{ eggs_produced_month }} pzas</h3>
+                        {% else %}
+                            <h3 class="mb-0 opacity-75">Sin registro</h3>
+                        {% endif %}
+                    </div>
+                    <i class="fas fa-egg fa-2x opacity-50"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6">
+        <div class="card text-white shadow h-100" style="background: linear-gradient(135deg, #b45309, #d97706);">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-uppercase mb-1" style="font-size:0.75rem;">Vendidos ({{ view_date|date:"F" }})</h6>
+                        {% if eggs_sold_pieces_month > 0 or eggs_sold_kg_month > 0 %}
+                            <h3 class="mb-0">
+                                {% if eggs_sold_pieces_month > 0 %}{{ eggs_sold_pieces_month }} pzas{% endif %}
+                                {% if eggs_sold_pieces_month > 0 and eggs_sold_kg_month > 0 %} · {% endif %}
+                                {% if eggs_sold_kg_month > 0 %}{{ eggs_sold_kg_month|floatformat:1 }} kg{% endif %}
+                            </h3>
+                        {% else %}
+                            <h3 class="mb-0 opacity-75">Sin registro</h3>
+                        {% endif %}
+                    </div>
+                    <i class="fas fa-shopping-basket fa-2x opacity-50"></i>
                 </div>
             </div>
         </div>
@@ -146,6 +188,9 @@
                                 <th class="text-end">Ventas</th>
                                 <th class="text-end">Gastos</th>
                                 <th class="text-end">Utilidad</th>
+                                <th class="text-end">Prod. (pzas)</th>
+                                <th class="text-end">Vend. (pzas)</th>
+                                <th class="text-end">Vend. (kg)</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -155,10 +200,13 @@
                                     <td class="text-end text-success">${{ month_data.total_sales|floatformat:2 }}</td>
                                     <td class="text-end text-danger">-${{ month_data.total_expenses|floatformat:2 }}</td>
                                     <td class="text-end fw-bold {% if month_data.net_profit >= 0 %}text-primary{% else %}text-danger{% endif %}">${{ month_data.net_profit|floatformat:2 }}</td>
+                                    <td class="text-end">{% if month_data.eggs_produced %}{{ month_data.eggs_produced }}{% else %}—{% endif %}</td>
+                                    <td class="text-end">{% if month_data.eggs_sold_pieces %}{{ month_data.eggs_sold_pieces }}{% else %}—{% endif %}</td>
+                                    <td class="text-end">{% if month_data.eggs_sold_kg %}{{ month_data.eggs_sold_kg|floatformat:1 }}{% else %}—{% endif %}</td>
                                 </tr>
                             {% empty %}
                                 <tr>
-                                    <td colspan="4" class="text-center">No hay datos financieros disponibles.</td>
+                                    <td colspan="7" class="text-center">No hay datos financieros disponibles.</td>
                                 </tr>
                             {% endfor %}
                         </tbody>
@@ -185,6 +233,24 @@
                 <div style="min-height: 350px; position: relative; margin: auto;">
                     <canvas id="expenseCategoryChart"></canvas>
                 </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Egg Production vs Sales Chart -->
+<div class="row">
+    <div class="col-12 mb-4">
+        <div class="card shadow">
+            <div class="card-header text-white" style="background: linear-gradient(135deg, #1a6b3a, #2e8b57);">
+                <h5 class="mb-0"><i class="fas fa-egg"></i> Producción vs Ventas de Huevo (últimos 12 meses)</h5>
+            </div>
+            <div class="card-body">
+                {% if monthly_financial_data %}
+                    <canvas id="eggChart" style="max-height:300px;"></canvas>
+                {% else %}
+                    <p class="text-center text-muted my-4">Sin datos de huevo registrados aún.</p>
+                {% endif %}
             </div>
         </div>
     </div>
@@ -334,5 +400,52 @@
     expenseMonthSelector.addEventListener('change', (event) => {
         renderExpenseCategoryChart(event.target.value);
     });
+
+    // 5. Egg Production vs Sales Chart
+    const eggCanvas = document.getElementById('eggChart');
+    if (eggCanvas && monthlyFinancialData.length > 0) {
+        const eggLabels = monthlyFinancialData.map(m => m.month);
+        const eggProduced = monthlyFinancialData.map(m => m.eggs_produced || 0);
+        const eggSoldPieces = monthlyFinancialData.map(m => m.eggs_sold_pieces || 0);
+
+        new Chart(eggCanvas.getContext('2d'), {
+            type: 'bar',
+            data: {
+                labels: eggLabels,
+                datasets: [
+                    {
+                        label: 'Producción (pzas)',
+                        data: eggProduced,
+                        backgroundColor: 'rgba(30, 139, 87, 0.75)',
+                        borderColor: '#1a6b3a',
+                        borderWidth: 1,
+                        borderRadius: 4,
+                    },
+                    {
+                        label: 'Vendidos (pzas)',
+                        data: eggSoldPieces,
+                        backgroundColor: 'rgba(217, 119, 6, 0.75)',
+                        borderColor: '#b45309',
+                        borderWidth: 1,
+                        borderRadius: 4,
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { position: 'top' },
+                    tooltip: {
+                        callbacks: {
+                            label: ctx => `${ctx.dataset.label}: ${ctx.parsed.y.toLocaleString()} pzas`
+                        }
+                    }
+                },
+                scales: {
+                    y: { beginAtZero: true, title: { display: true, text: 'Cantidad (piezas)' } }
+                }
+            }
+        });
+    }
 </script>
 {% endblock %}

@@ -12,4 +12,7 @@ urlpatterns = [
     path('orders/', views.OrderListView.as_view(), name='order_list'),
     path('orders/create/', views.OrderCreateView.as_view(), name='order_create'),
     path('orders/<int:pk>/complete/', views.complete_order, name='order_complete'),
+
+    # Investor Dashboard
+    path('inversores/', views.InvestorDashboardView.as_view(), name='investor_dashboard'),
 ]

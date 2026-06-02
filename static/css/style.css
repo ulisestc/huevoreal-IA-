@@ -203,6 +203,27 @@ h2 {
     }
 }
 
+/* Chart height limit for readability */
+canvas {
+    max-height: 350px;
+}
+
+/* KPI card consistency */
+.card .card-body h3 {
+    font-size: 1.6rem;
+    font-weight: 700;
+}
+
+/* Mobile: KPI cards side by side */
+@media (max-width: 576px) {
+    .card .card-body h3 {
+        font-size: 1.2rem;
+    }
+    canvas {
+        max-height: 220px;
+    }
+}
+
 /* Custom Scrollbar for responsive tables to make them more obvious */
 .table-responsive::-webkit-scrollbar {
     height: 6px;

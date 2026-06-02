@@ -1,0 +1,338 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<!-- Header -->
+<div class="mb-4">
+    <h2><i class="fas fa-hand-holding-usd"></i> Dashboard de Inversores</h2>
+    <p class="text-muted mb-2">
+        Datos reales del negocio — {{ months_of_data }} mes{{ months_of_data|pluralize:"es" }} de historial operativo
+        ({{ data_start|date:"d/m/Y" }} &ndash; {{ data_end|date:"d/m/Y" }})
+    </p>
+    {% if months_of_data == 0 %}
+        <div class="alert alert-danger">
+            <i class="fas fa-exclamation-triangle"></i>
+            <strong>Sin datos suficientes.</strong> Registra ventas y gastos para generar proyecciones.
+        </div>
+    {% elif months_of_data < 3 %}
+        <div class="alert alert-danger">
+            <i class="fas fa-exclamation-triangle"></i>
+            <strong>Historial insuficiente ({{ months_of_data }} mes{{ months_of_data|pluralize:"es" }}).</strong>
+            Se necesitan al menos 3 meses para proyecciones confiables.
+        </div>
+    {% elif months_of_data < 6 %}
+        <div class="alert alert-warning">
+            <i class="fas fa-exclamation-circle"></i>
+            <strong>Historial limitado ({{ months_of_data }} meses).</strong>
+            Las proyecciones mejoran con más datos. Confiabilidad: media.
+        </div>
+    {% else %}
+        <div class="alert alert-success">
+            <i class="fas fa-check-circle"></i>
+            Proyecciones basadas en <strong>{{ months_of_data }} meses</strong> de operación real.
+            Confiabilidad: <strong>alta</strong>.
+        </div>
+    {% endif %}
+</div>
+
+{% if months_of_data > 0 %}
+
+<!-- KPI Row 1: Financial -->
+<div class="row g-3 mb-3">
+    <div class="col-6 col-md-4">
+        <div class="card bg-success text-white shadow h-100">
+            <div class="card-body">
+                <h6 class="text-uppercase mb-1" style="font-size:0.72rem;">Ingreso Mensual Promedio</h6>
+                <h3 class="mb-0">${{ avg_monthly_sales|floatformat:2 }}</h3>
+                <small class="opacity-75">promedio real / mes</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-4">
+        <div class="card bg-primary text-white shadow h-100">
+            <div class="card-body">
+                <h6 class="text-uppercase mb-1" style="font-size:0.72rem;">Utilidad Mensual Promedio</h6>
+                <h3 class="mb-0">${{ avg_monthly_profit|floatformat:2 }}</h3>
+                <small class="opacity-75">ingreso &minus; gastos</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-md-4">
+        <div class="card text-white shadow h-100" style="background:#1a6b3a;">
+            <div class="card-body">
+                <h6 class="text-uppercase mb-1" style="font-size:0.72rem;">Margen de Ganancia</h6>
+                <h3 class="mb-0">{{ profit_margin_pct|floatformat:1 }}%</h3>
+                <small class="opacity-75">sobre ventas totales</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- KPI Row 2: Operations -->
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-4">
+        <div class="card shadow h-100" style="background:#d97706; color:#fff;">
+            <div class="card-body">
+                <h6 class="text-uppercase mb-1" style="font-size:0.72rem;">Crecimiento Mensual Promedio</h6>
+                {% if avg_monthly_growth >= 0 %}
+                    <h3 class="mb-0 text-white">+{{ avg_monthly_growth|floatformat:1 }}%</h3>
+                {% else %}
+                    <h3 class="mb-0 text-white">{{ avg_monthly_growth|floatformat:1 }}%</h3>
+                {% endif %}
+                <small class="opacity-75">variación de ventas mes a mes</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-4">
+        <div class="card bg-info text-white shadow h-100">
+            <div class="card-body">
+                <h6 class="text-uppercase mb-1" style="font-size:0.72rem;">Clientes Atendidos</h6>
+                <h3 class="mb-0">{{ total_customers }}</h3>
+                <small class="opacity-75">clientes únicos en historial</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-md-4">
+        <div class="card bg-dark text-white shadow h-100">
+            <div class="card-body">
+                <h6 class="text-uppercase mb-1" style="font-size:0.72rem;">Huevos Producidos (Total)</h6>
+                {% if total_eggs_produced > 0 %}
+                    <h3 class="mb-0">{{ total_eggs_produced }} pzas</h3>
+                {% else %}
+                    <h3 class="mb-0 opacity-50">Sin registro</h3>
+                {% endif %}
+                <small class="opacity-75">acumulado histórico</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Charts -->
+<div class="row">
+    <div class="col-lg-8 mb-4">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="fas fa-chart-line"></i> Tendencia Financiera (últimos {{ months_of_data }} meses)</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="financialTrendChart" style="max-height:300px;"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4 mb-4">
+        <div class="card shadow">
+            <div class="card-header text-white" style="background:#1a6b3a;">
+                <h5 class="mb-0"><i class="fas fa-egg"></i> Producción de Huevo</h5>
+            </div>
+            <div class="card-body">
+                {% if total_eggs_produced > 0 %}
+                    <canvas id="eggTrendChart" style="max-height:300px;"></canvas>
+                {% else %}
+                    <p class="text-center text-muted my-5">Sin movimientos de producción registrados.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ROI Calculator -->
+<div class="card shadow mb-4">
+    <div class="card-header bg-primary text-white">
+        <h5 class="mb-0"><i class="fas fa-calculator"></i> Calculadora de Retorno sobre Inversión</h5>
+    </div>
+    <div class="card-body">
+        <div class="alert alert-info mb-4">
+            <i class="fas fa-info-circle"></i>
+            Esta calculadora proyecta el retorno estimado basándose en el <strong>promedio real de utilidad mensual
+            (${{ avg_monthly_profit|floatformat:2 }})</strong> de los últimos {{ months_of_data }} meses de operación.
+            No representa una garantía de rendimiento.
+        </div>
+
+        <div class="row g-4">
+            <div class="col-md-6">
+                <label for="investmentAmount" class="form-label fw-bold">¿Cuánto deseas invertir? ($)</label>
+                <input type="number" id="investmentAmount" class="form-control form-control-lg"
+                    min="1000" step="1000" value="50000" placeholder="Ej: 50000">
+
+                <label for="participationPct" class="form-label fw-bold mt-3">¿Qué % de utilidades recibirías?</label>
+                <div class="d-flex align-items-center gap-3">
+                    <input type="range" id="participationSlider" class="form-range flex-grow-1"
+                        min="5" max="100" step="5" value="50">
+                    <span id="participationLabel" class="fw-bold text-primary" style="min-width:3rem;">50%</span>
+                </div>
+                <small class="text-muted">
+                    Utilidad base del negocio: <strong>${{ avg_monthly_profit|floatformat:2 }}/mes</strong>
+                    ({{ months_of_data }} meses de datos reales)
+                </small>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card bg-light h-100">
+                    <div class="card-body">
+                        <h6 class="text-uppercase text-muted mb-3" style="font-size:0.75rem;">Proyección Estimada</h6>
+                        <div class="row g-2 text-center">
+                            <div class="col-6">
+                                <div class="p-2 rounded" style="background:#e8f5e9;">
+                                    <div style="font-size:0.7rem; color:#1a6b3a;" class="text-uppercase fw-bold">Retorno/mes</div>
+                                    <div id="monthlyReturn" class="fw-bold" style="font-size:1.3rem; color:#1a6b3a;">—</div>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="p-2 rounded" style="background:#e3f2fd;">
+                                    <div style="font-size:0.7rem; color:#1565c0;" class="text-uppercase fw-bold">Meses para recuperar</div>
+                                    <div id="monthsToRecover" class="fw-bold" style="font-size:1.3rem; color:#1565c0;">—</div>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="p-2 rounded" style="background:#fff3e0;">
+                                    <div style="font-size:0.7rem; color:#b45309;" class="text-uppercase fw-bold">Retorno año 1</div>
+                                    <div id="year1Return" class="fw-bold" style="font-size:1.3rem; color:#b45309;">—</div>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="p-2 rounded" style="background:#fce4ec;">
+                                    <div style="font-size:0.7rem; color:#880e4f;" class="text-uppercase fw-bold">ROI anual estimado</div>
+                                    <div id="annualRoi" class="fw-bold" style="font-size:1.3rem; color:#880e4f;">—</div>
+                                </div>
+                            </div>
+                        </div>
+                        <hr>
+                        <p class="text-muted mb-0" style="font-size:0.78rem;">
+                            <i class="fas fa-exclamation-circle"></i>
+                            Proyección basada en historial de <strong>{{ months_of_data }} meses reales</strong>
+                            ({{ data_start|date:"d/m/Y" }} – {{ data_end|date:"d/m/Y" }}).
+                            Las condiciones del mercado pueden variar.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% else %}
+<div class="text-center py-5">
+    <i class="fas fa-chart-bar fa-4x text-muted mb-3"></i>
+    <h4 class="text-muted">Registra ventas y gastos para ver el dashboard de inversores.</h4>
+</div>
+{% endif %}
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const monthlyData = JSON.parse('{{ monthly_data_json|default:"[]"|safe }}');
+    const avgMonthlyProfit = {{ avg_monthly_profit_float|default:0 }};
+
+    // Financial Trend Chart
+    const financialCanvas = document.getElementById('financialTrendChart');
+    if (financialCanvas && monthlyData.length > 0) {
+        new Chart(financialCanvas.getContext('2d'), {
+            type: 'line',
+            data: {
+                labels: monthlyData.map(m => m.month),
+                datasets: [
+                    {
+                        label: 'Ingresos ($)',
+                        data: monthlyData.map(m => m.sales),
+                        borderColor: '#27ae60',
+                        backgroundColor: 'rgba(39,174,96,0.1)',
+                        borderWidth: 2,
+                        tension: 0.3,
+                        fill: false,
+                    },
+                    {
+                        label: 'Gastos ($)',
+                        data: monthlyData.map(m => m.expenses),
+                        borderColor: '#e74c3c',
+                        backgroundColor: 'rgba(231,76,60,0.1)',
+                        borderWidth: 2,
+                        tension: 0.3,
+                        fill: false,
+                    },
+                    {
+                        label: 'Utilidad ($)',
+                        data: monthlyData.map(m => m.profit),
+                        borderColor: '#2980b9',
+                        backgroundColor: 'rgba(41,128,185,0.15)',
+                        borderWidth: 2,
+                        tension: 0.3,
+                        fill: true,
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { position: 'top' } },
+                scales: {
+                    y: { beginAtZero: false, title: { display: true, text: 'Monto ($)' } }
+                }
+            }
+        });
+    }
+
+    // Egg Trend Chart
+    const eggCanvas = document.getElementById('eggTrendChart');
+    if (eggCanvas && monthlyData.length > 0) {
+        new Chart(eggCanvas.getContext('2d'), {
+            type: 'bar',
+            data: {
+                labels: monthlyData.map(m => m.month),
+                datasets: [{
+                    label: 'Producción (pzas)',
+                    data: monthlyData.map(m => m.eggs_produced || 0),
+                    backgroundColor: 'rgba(30, 139, 87, 0.75)',
+                    borderColor: '#1a6b3a',
+                    borderWidth: 1,
+                    borderRadius: 4,
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { beginAtZero: true, title: { display: true, text: 'Piezas' } }
+                }
+            }
+        });
+    }
+
+    // ROI Calculator
+    const investmentInput = document.getElementById('investmentAmount');
+    const participationSlider = document.getElementById('participationSlider');
+    const participationLabel = document.getElementById('participationLabel');
+
+    function fmt(n) {
+        return '$' + n.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    function updateROI() {
+        const investment = parseFloat(investmentInput.value) || 0;
+        const pct = parseFloat(participationSlider.value) / 100;
+        const monthly = avgMonthlyProfit * pct;
+
+        participationLabel.textContent = Math.round(pct * 100) + '%';
+
+        if (investment <= 0 || avgMonthlyProfit <= 0) {
+            ['monthlyReturn', 'monthsToRecover', 'year1Return', 'annualRoi'].forEach(id => {
+                document.getElementById(id).textContent = '—';
+            });
+            return;
+        }
+
+        const monthsToRecover = monthly > 0 ? Math.ceil(investment / monthly) : Infinity;
+        const year1 = monthly * 12;
+        const annualRoi = (year1 / investment) * 100;
+
+        document.getElementById('monthlyReturn').textContent = fmt(monthly);
+        document.getElementById('monthsToRecover').textContent =
+            monthsToRecover === Infinity ? '∞' : monthsToRecover + ' meses';
+        document.getElementById('year1Return').textContent = fmt(year1);
+        document.getElementById('annualRoi').textContent = annualRoi.toFixed(1) + '%';
+    }
+
+    if (investmentInput) {
+        investmentInput.addEventListener('input', updateROI);
+        participationSlider.addEventListener('input', updateROI);
+        updateROI();
+    }
+</script>
+{% endblock %}

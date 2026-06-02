@@ -1,3 +1,4 @@
+import datetime
 from django.db import models
 
 class Location(models.Model):
@@ -33,7 +34,7 @@ class InventoryMovement(models.Model):
     quantity = models.IntegerField(verbose_name="Cantidad")
     movement_type = models.CharField(max_length=20, choices=MOVEMENT_CHOICES, verbose_name="Tipo de Movimiento")
     merma = models.IntegerField(default=0, verbose_name="Merma")
-    date = models.DateTimeField(auto_now_add=True, verbose_name="Fecha")
+    date = models.DateField(default=datetime.date.today, verbose_name="Fecha")
 
     class Meta:
         verbose_name = "Movimiento de Inventario"

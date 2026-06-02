@@ -4,12 +4,13 @@ from .models import InventoryMovement
 class InventoryMovementForm(forms.ModelForm):
     class Meta:
         model = InventoryMovement
-        fields = ['location', 'movement_type', 'quantity', 'merma']
+        fields = ['location', 'movement_type', 'quantity', 'merma', 'date']
         widgets = {
             'location': forms.Select(attrs={'class': 'form-select form-select-lg'}),
             'movement_type': forms.Select(attrs={'class': 'form-select form-select-lg', 'id': 'id_movement_type'}),
             'quantity': forms.NumberInput(attrs={'class': 'form-control form-control-lg'}),
             'merma': forms.NumberInput(attrs={'class': 'form-control form-control-lg'}),
+            'date': forms.DateInput(attrs={'class': 'form-control form-control-lg', 'type': 'date'}),
         }
     
     def __init__(self, *args, **kwargs):

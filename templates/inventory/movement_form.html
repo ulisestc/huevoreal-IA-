@@ -29,6 +29,12 @@
                         {{ form.quantity.errors }}
                     </div>
 
+                    <div class="mb-3">
+                        <label for="{{ form.date.id_for_label }}" class="form-label">Fecha</label>
+                        {{ form.date }}
+                        {{ form.date.errors }}
+                    </div>
+
                     <div class="mb-3" id="div_id_merma" style="display: none;">
                         <label for="{{ form.merma.id_for_label }}" class="form-label">Merma (Piezas Rotas/Malas)</label>
                         {{ form.merma }}

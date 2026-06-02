@@ -7,7 +7,7 @@ from .forms import SaleForm, OrderForm
 from inventory.models import Inventory, InventoryMovement
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import transaction, models
-from django.db.models import Sum, Q
+from django.db.models import Sum, Q, Avg, Count
 from django.db.models.functions import TruncDay, TruncMonth
 from datetime import timedelta, date
 from django.utils import timezone
@@ -205,6 +205,25 @@ class StatisticsView(LoginRequiredMixin, TemplateView):
         context['total_sales_month'] = total_sales_month
         context['total_expenses_month'] = total_expenses_month
         context['net_profit_month'] = net_profit_month
+
+        # Egg production and sales for selected month
+        eggs_produced_month = InventoryMovement.objects.filter(
+            movement_type='PRODUCCION',
+            date__gte=month_start,
+            date__lte=month_end
+        ).aggregate(Sum('quantity'))['quantity__sum'] or 0
+
+        eggs_sold_pieces_month = Sale.objects.filter(
+            day__range=[month_start, month_end]
+        ).aggregate(Sum('quantity_piece'))['quantity_piece__sum'] or 0
+
+        eggs_sold_kg_month = float(Sale.objects.filter(
+            day__range=[month_start, month_end]
+        ).aggregate(Sum('quantity_kg'))['quantity_kg__sum'] or 0)
+
+        context['eggs_produced_month'] = eggs_produced_month
+        context['eggs_sold_pieces_month'] = eggs_sold_pieces_month
+        context['eggs_sold_kg_month'] = eggs_sold_kg_month
         context['trend_labels'] = json.dumps(trend_labels, cls=DjangoJSONEncoder)
         context['trend_data'] = json.dumps(trend_data, cls=DjangoJSONEncoder)
         context['payment_labels'] = json.dumps(payment_labels, cls=DjangoJSONEncoder)
@@ -259,12 +278,25 @@ class StatisticsView(LoginRequiredMixin, TemplateView):
 
             s_m = Sale.objects.filter(day__range=[ms, me]).aggregate(Sum('price'))['price__sum'] or 0
             e_m = Expense.objects.filter(date__range=[ms, me]).aggregate(Sum('amount'))['amount__sum'] or 0
-            
+
+            eggs_prod_m = InventoryMovement.objects.filter(
+                movement_type='PRODUCCION',
+                date__gte=ms,
+                date__lte=me
+            ).aggregate(Sum('quantity'))['quantity__sum'] or 0
+            eggs_sold_p_m = Sale.objects.filter(day__range=[ms, me]).aggregate(
+                Sum('quantity_piece'))['quantity_piece__sum'] or 0
+            eggs_sold_k_m = float(Sale.objects.filter(day__range=[ms, me]).aggregate(
+                Sum('quantity_kg'))['quantity_kg__sum'] or 0)
+
             monthly_financial_data.append({
                 'month': am['label'],
                 'total_sales': s_m,
                 'total_expenses': e_m,
                 'net_profit': s_m - e_m,
+                'eggs_produced': eggs_prod_m,
+                'eggs_sold_pieces': eggs_sold_p_m or 0,
+                'eggs_sold_kg': eggs_sold_k_m,
             })
 
             cat_exp = Expense.objects.filter(date__range=[ms, me]).values('category').annotate(total=Sum('amount'))
@@ -273,5 +305,109 @@ class StatisticsView(LoginRequiredMixin, TemplateView):
         context['monthly_financial_data'] = monthly_financial_data
         context['monthly_financial_json'] = json.dumps(monthly_financial_data, cls=DjangoJSONEncoder)
         context['monthly_category_expenses'] = json.dumps(monthly_category_expenses, cls=DjangoJSONEncoder)
+
+        return context
+
+
+class InvestorDashboardView(LoginRequiredMixin, TemplateView):
+    template_name = 'sales/investor_dashboard.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        month_names_es = {
+            1: 'Enero', 2: 'Febrero', 3: 'Marzo', 4: 'Abril',
+            5: 'Mayo', 6: 'Junio', 7: 'Julio', 8: 'Agosto',
+            9: 'Septiembre', 10: 'Octubre', 11: 'Noviembre', 12: 'Diciembre'
+        }
+
+        # Get all months that have sales or expense data
+        sales_months = Sale.objects.annotate(month=TruncMonth('day')).values_list('month', flat=True).distinct()
+        expenses_months = Expense.objects.annotate(month=TruncMonth('date')).values_list('month', flat=True).distinct()
+        all_months_raw = sorted(
+            set(list(sales_months) + list(expenses_months)),
+            reverse=True
+        )
+        all_months_raw = [d for d in all_months_raw if d]
+
+        # Limit to last 12 months for display
+        report_months_raw = all_months_raw[:12]
+
+        # Build monthly data in chronological order (oldest → newest)
+        monthly_data = []
+        for d in reversed(report_months_raw):
+            ms = date(d.year, d.month, 1)
+            me = ms.replace(day=calendar.monthrange(ms.year, ms.month)[1])
+
+            s = float(Sale.objects.filter(day__range=[ms, me]).aggregate(Sum('price'))['price__sum'] or 0)
+            e = float(Expense.objects.filter(date__range=[ms, me]).aggregate(Sum('amount'))['amount__sum'] or 0)
+            p = s - e
+
+            eggs_prod = InventoryMovement.objects.filter(
+                movement_type='PRODUCCION',
+                date__gte=ms,
+                date__lte=me
+            ).aggregate(Sum('quantity'))['quantity__sum'] or 0
+
+            monthly_data.append({
+                'month': f"{month_names_es[ms.month]} {ms.year}",
+                'sales': s,
+                'expenses': e,
+                'profit': p,
+                'eggs_produced': eggs_prod,
+            })
+
+        # Only use months with BOTH sales and expenses for KPI averages.
+        # Months missing either (e.g. no expenses registered) would skew profit/margin.
+        complete_months = [m for m in monthly_data if m['sales'] > 0 and m['expenses'] > 0]
+        months_of_data = len(complete_months)
+
+        if complete_months:
+            avg_monthly_sales = sum(m['sales'] for m in complete_months) / len(complete_months)
+            avg_monthly_expenses = sum(m['expenses'] for m in complete_months) / len(complete_months)
+            avg_monthly_profit = sum(m['profit'] for m in complete_months) / len(complete_months)
+            profit_margin_pct = (avg_monthly_profit / avg_monthly_sales * 100) if avg_monthly_sales > 0 else 0
+
+            growth_rates = []
+            for i in range(1, len(complete_months)):
+                prev_s = complete_months[i - 1]['sales']
+                curr_s = complete_months[i]['sales']
+                if prev_s > 0:
+                    growth_rates.append((curr_s - prev_s) / prev_s * 100)
+            avg_monthly_growth = sum(growth_rates) / len(growth_rates) if growth_rates else 0
+        else:
+            avg_monthly_sales = avg_monthly_expenses = avg_monthly_profit = 0
+            profit_margin_pct = avg_monthly_growth = 0
+
+        # Totals across all available history (not just last 12 months)
+        total_customers = Sale.objects.values('customer').distinct().count()
+
+        total_eggs_produced = InventoryMovement.objects.filter(
+            movement_type='PRODUCCION'
+        ).aggregate(Sum('quantity'))['quantity__sum'] or 0
+
+        total_eggs_sold_pieces = Sale.objects.aggregate(
+            Sum('quantity_piece'))['quantity_piece__sum'] or 0
+
+        # Data date range
+        first_sale = Sale.objects.order_by('day').first()
+        data_start = first_sale.day if first_sale else timezone.now().date()
+
+        context.update({
+            'months_of_data': months_of_data,
+            'avg_monthly_sales': avg_monthly_sales,
+            'avg_monthly_expenses': avg_monthly_expenses,
+            'avg_monthly_profit': avg_monthly_profit,
+            'profit_margin_pct': profit_margin_pct,
+            'avg_monthly_growth': avg_monthly_growth,
+            'total_customers': total_customers,
+            'total_eggs_produced': total_eggs_produced,
+            'total_eggs_sold_pieces': total_eggs_sold_pieces,
+            'monthly_data': monthly_data,
+            'monthly_data_json': json.dumps(monthly_data, cls=DjangoJSONEncoder),
+            'avg_monthly_profit_float': float(avg_monthly_profit),
+            'data_start': data_start,
+            'data_end': timezone.now().date(),
+        })
 
         return context

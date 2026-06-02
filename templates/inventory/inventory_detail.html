@@ -36,7 +36,7 @@
                 <tbody>
                     {% for movement in movements %}
                         <tr>
-                            <td>{{ movement.date|date:"d/m/Y H:i" }}</td>
+                            <td>{{ movement.date|date:"d/m/Y" }}</td>
                             <td>
                                 {% if movement.movement_type == 'PRODUCCION' %}
                                     <span class="badge bg-success">Producción</span>
