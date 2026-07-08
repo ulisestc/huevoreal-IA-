@@ -54,9 +54,11 @@
                         <li class="nav-item">
                             <a class="nav-link" href="{% url 'statistics' %}"><i class="fas fa-chart-pie"></i> Estadísticas</a>
                         </li>
+                        <!-- Hide for now as requested
                         <li class="nav-item">
                             <a class="nav-link" href="{% url 'investor_dashboard' %}"><i class="fas fa-hand-holding-usd"></i> Inversores</a>
                         </li>
+                        -->
                         <li class="nav-item">
                             <form method="post" action="{% url 'logout' %}" class="d-inline">
                                 {% csrf_token %}

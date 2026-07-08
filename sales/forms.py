@@ -5,7 +5,7 @@ from customers.models import Customer
 class SaleForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(SaleForm, self).__init__(*args, **kwargs)
-        self.fields['customer'].queryset = Customer.objects.all().order_by('name')
+        self.fields['customer'].queryset = Customer.objects.all().order_by('first_name', 'last_name')
 
     class Meta:
         model = Sale
@@ -28,7 +28,7 @@ class SaleForm(forms.ModelForm):
 class OrderForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(OrderForm, self).__init__(*args, **kwargs)
-        self.fields['customer'].queryset = Customer.objects.all().order_by('name')
+        self.fields['customer'].queryset = Customer.objects.all().order_by('first_name', 'last_name')
 
     class Meta:
         model = Order

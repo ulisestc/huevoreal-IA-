@@ -35,6 +35,7 @@ class InventoryMovement(models.Model):
     movement_type = models.CharField(max_length=20, choices=MOVEMENT_CHOICES, verbose_name="Tipo de Movimiento")
     merma = models.IntegerField(default=0, verbose_name="Merma")
     date = models.DateField(default=datetime.date.today, verbose_name="Fecha")
+    sale = models.ForeignKey('sales.Sale', on_delete=models.CASCADE, null=True, blank=True, verbose_name="Venta", related_name="inventory_movements")
 
     class Meta:
         verbose_name = "Movimiento de Inventario"

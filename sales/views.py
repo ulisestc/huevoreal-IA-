@@ -7,8 +7,8 @@ from .forms import SaleForm, OrderForm
 from inventory.models import Inventory, InventoryMovement
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import transaction, models
-from django.db.models import Sum, Q, Avg, Count
-from django.db.models.functions import TruncDay, TruncMonth
+from django.db.models import Sum, Q, Avg, Count, Value
+from django.db.models.functions import TruncDay, TruncMonth, Concat
 from datetime import timedelta, date
 from django.utils import timezone
 import json
@@ -28,7 +28,7 @@ class SaleListView(LoginRequiredMixin, ListView):
         queryset = super().get_queryset()
         q = self.request.GET.get('q')
         if q:
-            queryset = queryset.filter(Q(customer__name__icontains=q) | Q(id__icontains=q))
+            queryset = queryset.filter(Q(customer__first_name__icontains=q) | Q(customer__last_name__icontains=q) | Q(id__icontains=q))
         status = self.request.GET.get('status')
         if status == 'pending':
             queryset = queryset.filter(Q(is_paid=False) & Q(amount_paid__lt=models.F('price')))
@@ -60,7 +60,7 @@ class SaleCreateView(LoginRequiredMixin, CreateView):
                 inventory, _ = Inventory.objects.get_or_create(location=sale.location, defaults={'quantity': 0})
                 inventory.quantity -= qty_to_subtract
                 inventory.save()
-                InventoryMovement.objects.create(location=sale.location, quantity=qty_to_subtract, movement_type='VENTA', date=sale.day)
+                InventoryMovement.objects.create(location=sale.location, quantity=qty_to_subtract, movement_type='VENTA', date=sale.day, sale=sale)
         return response
 
 class SaleUpdateView(LoginRequiredMixin, UpdateView):
@@ -84,6 +84,25 @@ class SaleUpdateView(LoginRequiredMixin, UpdateView):
                 inv_new, _ = Inventory.objects.get_or_create(location=new_sale.location, defaults={'quantity': 0})
                 inv_new.quantity -= new_qty
                 inv_new.save()
+
+            # Sync inventory movement
+            if new_qty > 0 and new_sale.location:
+                movement, created = InventoryMovement.objects.get_or_create(
+                    sale=new_sale,
+                    defaults={
+                        'location': new_sale.location,
+                        'quantity': new_qty,
+                        'movement_type': 'VENTA',
+                        'date': new_sale.day
+                    }
+                )
+                if not created:
+                    movement.location = new_sale.location
+                    movement.quantity = new_qty
+                    movement.date = new_sale.day
+                    movement.save()
+            else:
+                InventoryMovement.objects.filter(sale=new_sale).delete()
         return response
 
 class OrderListView(LoginRequiredMixin, ListView):
@@ -134,7 +153,7 @@ def complete_order(request, pk):
         inventory, _ = Inventory.objects.get_or_create(location=sale.location, defaults={'quantity': 0})
         inventory.quantity -= qty_to_subtract
         inventory.save()
-        InventoryMovement.objects.create(location=sale.location, quantity=qty_to_subtract, movement_type='VENTA', date=sale.day)
+        InventoryMovement.objects.create(location=sale.location, quantity=qty_to_subtract, movement_type='VENTA', date=sale.day, sale=sale)
     
     order.status = 'COMPLETADO'
     order.save()
@@ -182,11 +201,12 @@ class StatisticsView(LoginRequiredMixin, TemplateView):
 
         # 3. Top Customers (Selected Month)
         top_customers = Sale.objects.filter(day__range=[month_start, month_end])\
-            .values('customer__name')\
+            .annotate(customer_name=Concat('customer__first_name', models.Value(' '), 'customer__last_name'))\
+            .values('customer_name')\
             .annotate(total=Sum('price'))\
             .order_by('-total')[:5]
             
-        customer_labels = [entry['customer__name'] for entry in top_customers]
+        customer_labels = [entry['customer_name'] for entry in top_customers]
         customer_data = [float(entry['total']) for entry in top_customers]
 
         # 4. Sales by Seller (Selected Month)

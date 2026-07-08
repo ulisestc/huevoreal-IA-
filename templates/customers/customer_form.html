@@ -2,22 +2,243 @@
 
 {% block content %}
 <div class="row justify-content-center">
-    <div class="col-md-8 col-lg-6">
+    <div class="col-md-8 col-lg-8">
         <div class="card shadow">
             <div class="card-header">
-                <h3 class="mb-0">{% if object %}Editar Cliente{% else %}Crear Cliente{% endif %}</h3>
+                <h3 class="mb-0">{% if object %}Editar Cliente: {{ object }}{% else %}Crear Nuevo Cliente{% endif %}</h3>
             </div>
             <div class="card-body">
                 <form method="post">
                     {% csrf_token %}
-                    {{ form.as_p }}
-                    <div class="d-grid gap-2">
-                        <button type="submit" class="btn btn-primary">Guardar</button>
-                        <a href="{% url 'customer_list' %}" class="btn btn-secondary">Cancelar</a>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.first_name.id_for_label }}" class="form-label fw-bold">Nombre</label>
+                            {{ form.first_name }}
+                            {{ form.first_name.errors }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.last_name.id_for_label }}" class="form-label fw-bold">Apellido</label>
+                            {{ form.last_name }}
+                            {{ form.last_name.errors }}
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.phone_number.id_for_label }}" class="form-label fw-bold">Teléfono</label>
+                            {{ form.phone_number }}
+                            {{ form.phone_number.errors }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.seller.id_for_label }}" class="form-label fw-bold">Vendedor Asignado</label>
+                            {{ form.seller }}
+                            {{ form.seller.errors }}
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.fraccionamiento.id_for_label }}" class="form-label fw-bold">Fraccionamiento</label>
+                            <div class="input-group">
+                                {{ form.fraccionamiento }}
+                                <button class="btn btn-outline-secondary d-flex align-items-center justify-content-center" style="width: 42px;" type="button" data-bs-toggle="modal" data-bs-target="#addFraccionamientoModal" title="Agregar Fraccionamiento">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            </div>
+                            {{ form.fraccionamiento.errors }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.zona.id_for_label }}" class="form-label fw-bold">Zona</label>
+                            <div class="input-group">
+                                {{ form.zona }}
+                                <button class="btn btn-outline-secondary d-flex align-items-center justify-content-center" style="width: 42px;" type="button" data-bs-toggle="modal" data-bs-target="#addZonaModal" title="Agregar Zona">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            </div>
+                            {{ form.zona.errors }}
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-12 mb-3">
+                            <label for="{{ form.address.id_for_label }}" class="form-label fw-bold">Dirección</label>
+                            {{ form.address }}
+                            {{ form.address.errors }}
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-12 mb-3">
+                            <label for="{{ form.observaciones.id_for_label }}" class="form-label fw-bold">Observaciones de Venta</label>
+                            {{ form.observaciones }}
+                            <div class="form-text">Indique aquí la frecuencia de compra, cantidad estimada de piezas por semana/quincena u otros detalles relevantes.</div>
+                            {{ form.observaciones.errors }}
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                        <a href="{% url 'customer_list' %}" class="btn btn-secondary btn-lg px-4 me-md-2">Cancelar</a>
+                        <button type="submit" class="btn btn-primary btn-lg px-5">Guardar</button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
 </div>
+
+<!-- Modal Fraccionamiento -->
+<div class="modal fade" id="addFraccionamientoModal" tabindex="-1" aria-labelledby="addFraccionamientoModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addFraccionamientoModalLabel"><i class="fas fa-building me-2"></i>Nuevo Fraccionamiento</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="addFraccionamientoForm">
+                <div class="modal-body">
+                    <div id="fraccionamientoModalError" class="alert alert-danger d-none" role="alert"></div>
+                    <div class="mb-3">
+                        <label for="new_fraccionamiento_name" class="form-label fw-bold">Nombre del Fraccionamiento</label>
+                        <input type="text" class="form-control" id="new_fraccionamiento_name" required placeholder="Ej. Lomas de Angelópolis">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Zona -->
+<div class="modal fade" id="addZonaModal" tabindex="-1" aria-labelledby="addZonaModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addZonaModalLabel"><i class="fas fa-map-marker-alt me-2"></i>Nueva Zona</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="addZonaForm">
+                <div class="modal-body">
+                    <div id="zonaModalError" class="alert alert-danger d-none" role="alert"></div>
+                    <div class="mb-3">
+                        <label for="new_zona_name" class="form-label fw-bold">Nombre de la Zona</label>
+                        <input type="text" class="form-control" id="new_zona_name" required placeholder="Ej. Zona Sur">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const addFraccionamientoForm = document.getElementById('addFraccionamientoForm');
+    const addZonaForm = document.getElementById('addZonaForm');
+    
+    if (addFraccionamientoForm) {
+        addFraccionamientoForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const nameInput = document.getElementById('new_fraccionamiento_name');
+            const errorDiv = document.getElementById('fraccionamientoModalError');
+            const nameValue = nameInput.value.trim();
+            
+            errorDiv.classList.add('d-none');
+            
+            const formData = new FormData();
+            formData.append('name', nameValue);
+            formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+            
+            fetch("{% url 'fraccionamiento_create' %}", {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(data => { throw new Error(data.error || 'Ocurrió un error'); });
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    // Add new option to dropdown and select it
+                    const select = document.getElementById('id_fraccionamiento');
+                    const option = new Option(data.name, data.id, true, true);
+                    select.add(option);
+                    
+                    // Close Modal
+                    const modalEl = document.getElementById('addFraccionamientoModal');
+                    const modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+                    modal.hide();
+                    
+                    // Reset input
+                    nameInput.value = '';
+                }
+            })
+            .catch(error => {
+                errorDiv.innerText = error.message;
+                errorDiv.classList.remove('d-none');
+            });
+        });
+    }
+    
+    if (addZonaForm) {
+        addZonaForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const nameInput = document.getElementById('new_zona_name');
+            const errorDiv = document.getElementById('zonaModalError');
+            const nameValue = nameInput.value.trim();
+            
+            errorDiv.classList.add('d-none');
+            
+            const formData = new FormData();
+            formData.append('name', nameValue);
+            formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+            
+            fetch("{% url 'zona_create' %}", {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(data => { throw new Error(data.error || 'Ocurrió un error'); });
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    // Add new option to dropdown and select it
+                    const select = document.getElementById('id_zona');
+                    const option = new Option(data.name, data.id, true, true);
+                    select.add(option);
+                    
+                    // Close Modal
+                    const modalEl = document.getElementById('addZonaModal');
+                    const modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+                    modal.hide();
+                    
+                    // Reset input
+                    nameInput.value = '';
+                }
+            })
+            .catch(error => {
+                errorDiv.innerText = error.message;
+                errorDiv.classList.remove('d-none');
+            });
+        });
+    }
+});
+</script>
 {% endblock %}
