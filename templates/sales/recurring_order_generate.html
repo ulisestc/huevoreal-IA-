@@ -1,0 +1,272 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-2 mb-3">
+    <h2 class="mb-md-0"><i class="fas fa-magic"></i> Generar Pedidos de Reparto</h2>
+    <a href="{% url 'recurring_order_list' %}" class="btn btn-outline-secondary m-0"><i class="fas fa-redo"></i> Gestionar Suscripciones</a>
+</div>
+
+{% if messages %}
+    {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    {% endfor %}
+{% endif %}
+
+<form id="generate-form" method="post" action="{% url 'generate_recurring_orders' %}">
+    {% csrf_token %}
+    
+    <div class="card shadow-sm mb-4">
+        <div class="card-body bg-light">
+            <h5 class="card-title mb-3">Acción Masiva: Generar Pedidos Pendientes</h5>
+            <div class="row align-items-end g-3">
+                <div class="col-md-8 col-lg-7">
+                    <label class="form-label fw-bold d-block mb-2">Selecciona el Día de Reparto</label>
+                    <div class="d-flex flex-wrap gap-2 mb-2">
+                        <button type="button" class="btn btn-outline-secondary rounded-circle day-btn d-flex align-items-center justify-content-center" data-day="0" style="width: 45px; height: 45px; font-weight: bold; font-size: 1.1rem;">L</button>
+                        <button type="button" class="btn btn-outline-secondary rounded-circle day-btn d-flex align-items-center justify-content-center" data-day="1" style="width: 45px; height: 45px; font-weight: bold; font-size: 1.1rem;">A</button>
+                        <button type="button" class="btn btn-outline-secondary rounded-circle day-btn d-flex align-items-center justify-content-center" data-day="2" style="width: 45px; height: 45px; font-weight: bold; font-size: 1.1rem;">M</button>
+                        <button type="button" class="btn btn-outline-secondary rounded-circle day-btn d-flex align-items-center justify-content-center" data-day="3" style="width: 45px; height: 45px; font-weight: bold; font-size: 1.1rem;">J</button>
+                        <button type="button" class="btn btn-outline-secondary rounded-circle day-btn d-flex align-items-center justify-content-center" data-day="4" style="width: 45px; height: 45px; font-weight: bold; font-size: 1.1rem;">V</button>
+                        <button type="button" class="btn btn-outline-secondary rounded-circle day-btn d-flex align-items-center justify-content-center" data-day="5" style="width: 45px; height: 45px; font-weight: bold; font-size: 1.1rem;">S</button>
+                        <button type="button" class="btn btn-outline-secondary rounded-circle day-btn d-flex align-items-center justify-content-center" data-day="6" style="width: 45px; height: 45px; font-weight: bold; font-size: 1.1rem;">D</button>
+                    </div>
+                    <input type="hidden" name="delivery_date" id="delivery_date" required>
+                    <div class="form-text mt-1 text-dark" id="resolved-date-label">Los pedidos se generarán para: <strong>-</strong></div>
+                </div>
+                <div class="col-md-4 col-lg-5">
+                    <button type="button" id="btn-show-confirm" class="btn btn-success btn-lg w-100 m-0">
+                        <i class="fas fa-cog"></i> Generar Pedidos Seleccionados
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0 align-middle">
+                    <thead>
+                        <tr>
+                            <th style="width: 40px;" class="text-center">
+                                <input type="checkbox" id="select-all-checkbox" class="form-check-input" style="width: 20px; height: 20px;">
+                            </th>
+                            <th>Cliente</th>
+                            <th>Cantidad</th>
+                            <th>Frecuencia</th>
+                            <th>Día de Entrega</th>
+                            <th>Última Generación</th>
+                            <th class="text-end">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for ro in recurring_orders %}
+                            <tr class="subscription-row" data-frequency="{{ ro.frequency }}" data-day-of-week="{{ ro.day_of_week|default:'' }}" data-day-of-month="{{ ro.day_of_month|default:'' }}">
+                                <td class="text-center">
+                                    <input type="checkbox" name="recurring_order_ids" value="{{ ro.id }}" class="form-check-input select-item-checkbox" style="width: 20px; height: 20px;">
+                                </td>
+                                <td><strong>{{ ro.customer }}</strong></td>
+                                <td>
+                                    {% if ro.sale_type == 'PIEZA' %}
+                                        {{ ro.quantity_piece }} pzas
+                                    {% else %}
+                                        {{ ro.quantity_kg }} kg
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <span class="badge bg-secondary">{{ ro.get_frequency_display }}</span>
+                                </td>
+                                <td>
+                                    {% if ro.frequency == 'SEMANAL' or ro.frequency == 'QUINCENAL' %}
+                                        {{ ro.get_days_display }}
+                                    {% elif ro.frequency == 'MENSUAL' %}
+                                        Día {{ ro.day_of_month|default:"-" }} de cada mes
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if ro.last_generated_date %}
+                                        {{ ro.last_generated_date|date:"d/E/Y" }}
+                                    {% else %}
+                                        <span class="text-muted">Nunca</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-end">
+                                    <a href="{% url 'recurring_order_update' ro.id %}" class="btn btn-sm btn-outline-primary me-1"><i class="fas fa-edit"></i></a>
+                                    <a href="{% url 'recurring_order_delete' ro.id %}" class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i></a>
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="8" class="text-center py-4 text-muted">No hay pedidos recurrentes registrados o activos.</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</form>
+
+<!-- Confirmation Modal -->
+<div class="modal fade" id="confirmGenerationModal" tabindex="-1" aria-labelledby="confirmGenerationModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content shadow">
+      <div class="modal-header bg-light">
+        <h5 class="modal-title" id="confirmGenerationModalLabel"><i class="fas fa-question-circle text-success me-2"></i> Confirmar Generación</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body py-4 fs-5">
+        ¿Está seguro que desea generar los pedidos pendientes para las suscripciones seleccionadas?
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary px-4 m-0" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" id="btn-confirm-submit" class="btn btn-success px-4 m-0">Generar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const selectAllCheckbox = document.getElementById('select-all-checkbox');
+        const deliveryDateInput = document.getElementById('delivery_date');
+        const resolvedDateLabel = document.getElementById('resolved-date-label');
+        const dayButtons = document.querySelectorAll('.day-btn');
+
+        const dayNames = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"];
+        const monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+
+        function selectDay(targetDayIndex) {
+            // Highlight selected button
+            dayButtons.forEach(btn => {
+                const btnDay = parseInt(btn.getAttribute('data-day'));
+                if (btnDay === targetDayIndex) {
+                    btn.classList.remove('btn-outline-secondary');
+                    btn.classList.add('btn-success', 'text-white');
+                } else {
+                    btn.classList.remove('btn-success', 'text-white');
+                    btn.classList.add('btn-outline-secondary');
+                }
+            });
+
+            // Calculate target date
+            const todayDate = new Date();
+            const jsTodayDay = todayDate.getDay();
+            const djangoTodayDay = (jsTodayDay === 0) ? 6 : jsTodayDay - 1;
+
+            let diffDays = (targetDayIndex - djangoTodayDay + 7) % 7;
+            
+            const targetDate = new Date();
+            targetDate.setDate(todayDate.getDate() + diffDays);
+
+            // Set hidden field value
+            const yyyy = targetDate.getFullYear();
+            const mm = String(targetDate.getMonth() + 1).padStart(2, '0');
+            const dd = String(targetDate.getDate()).padStart(2, '0');
+            deliveryDateInput.value = `${yyyy}-${mm}-${dd}`;
+
+            // Update label
+            resolvedDateLabel.innerHTML = `Los pedidos se generarán para: <strong>${dayNames[targetDayIndex]}, ${targetDate.getDate()} de ${monthNames[targetDate.getMonth()]} de ${yyyy}</strong>`;
+
+            // Filter subscriptions
+            filterSubscriptions(targetDayIndex, targetDate.getDate());
+        }
+
+        function filterSubscriptions(djangoDay, dayOfMonth) {
+            let visibleCount = 0;
+            
+            document.querySelectorAll('.subscription-row').forEach(row => {
+                const freq = row.getAttribute('data-frequency');
+                const rowDow = row.getAttribute('data-day-of-week');
+                const rowDom = row.getAttribute('data-day-of-month');
+                
+                let matches = false;
+                if (freq === 'SEMANAL' || freq === 'QUINCENAL') {
+                    matches = rowDow.split(',').map(x => x.trim()).includes(String(djangoDay));
+                } else if (freq === 'MENSUAL') {
+                    matches = (rowDom === String(dayOfMonth));
+                }
+                
+                if (matches) {
+                    row.style.display = '';
+                    row.querySelector('.select-item-checkbox').checked = true; // Check by default
+                    visibleCount++;
+                } else {
+                    row.style.display = 'none';
+                    row.querySelector('.select-item-checkbox').checked = false; // Uncheck
+                }
+            });
+
+            // Adjust Select All checkbox state
+            if (selectAllCheckbox) {
+                selectAllCheckbox.checked = (visibleCount > 0);
+            }
+            
+            const noDataRow = document.getElementById('no-matching-data-row');
+            if (visibleCount === 0) {
+                if (!noDataRow) {
+                    const tbody = document.querySelector('#generate-form tbody');
+                    const tr = document.createElement('tr');
+                    tr.id = 'no-matching-data-row';
+                    tr.innerHTML = `<td colspan="8" class="text-center py-4 text-muted fw-bold"><i class="fas fa-calendar-times"></i> No hay suscripciones programadas para este día de la semana.</td>`;
+                    tbody.appendChild(tr);
+                } else {
+                    noDataRow.style.display = '';
+                }
+            } else if (noDataRow) {
+                noDataRow.style.display = 'none';
+            }
+        }
+
+        // Add event listeners to day buttons
+        dayButtons.forEach(btn => {
+            btn.addEventListener('click', function() {
+                const btnDay = parseInt(btn.getAttribute('data-day'));
+                selectDay(btnDay);
+            });
+        });
+
+        // Initialize to today's day of week
+        const todayDate = new Date();
+        const jsTodayDay = todayDate.getDay();
+        const djangoTodayDay = (jsTodayDay === 0) ? 6 : jsTodayDay - 1;
+        selectDay(djangoTodayDay);
+
+        if (selectAllCheckbox) {
+            selectAllCheckbox.addEventListener('change', function() {
+                const visibleCheckboxes = document.querySelectorAll('.subscription-row:not([style*="display: none"]) .select-item-checkbox');
+                visibleCheckboxes.forEach(cb => {
+                    cb.checked = selectAllCheckbox.checked;
+                });
+            });
+        }
+
+        const btnShowConfirm = document.getElementById('btn-show-confirm');
+        const btnConfirmSubmit = document.getElementById('btn-confirm-submit');
+        const confirmModalEl = document.getElementById('confirmGenerationModal');
+
+        if (btnShowConfirm) {
+            btnShowConfirm.addEventListener('click', function() {
+                const checkedCount = document.querySelectorAll('.select-item-checkbox:checked').length;
+                if (checkedCount === 0) {
+                    showAlert("Debe seleccionar al menos una suscripción para generar los pedidos.", "Atención");
+                } else {
+                    const confirmModal = new bootstrap.Modal(confirmModalEl);
+                    confirmModal.show();
+                }
+            });
+        }
+
+        if (btnConfirmSubmit) {
+            btnConfirmSubmit.addEventListener('click', function() {
+                document.getElementById('generate-form').submit();
+            });
+        }
+    });
+</script>
+{% endblock %}

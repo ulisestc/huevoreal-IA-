@@ -25,6 +25,10 @@
                     <div>
                         <h6 class="text-uppercase mb-1" style="font-size:0.75rem;">Ventas ({{ view_date|date:"F" }})</h6>
                         <h3 class="mb-0">${{ total_sales_month|floatformat:2 }}</h3>
+                        <div class="mt-2" style="font-size: 0.8rem; line-height: 1.2;">
+                            <span class="opacity-75 d-block"><i class="fas fa-egg me-1"></i>Propia: ${{ own_sales_month|floatformat:2 }}</span>
+                            <span class="opacity-75 d-block"><i class="fas fa-truck me-1"></i>Prov. Extra: ${{ supplier_sales_month|floatformat:2 }}</span>
+                        </div>
                     </div>
                     <i class="fas fa-money-bill-wave fa-2x opacity-50"></i>
                 </div>
@@ -84,15 +88,33 @@
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
                         <h6 class="text-uppercase mb-1" style="font-size:0.75rem;">Vendidos ({{ view_date|date:"F" }})</h6>
-                        {% if eggs_sold_pieces_month > 0 or eggs_sold_kg_month > 0 %}
-                            <h3 class="mb-0">
-                                {% if eggs_sold_pieces_month > 0 %}{{ eggs_sold_pieces_month }} pzas{% endif %}
-                                {% if eggs_sold_pieces_month > 0 and eggs_sold_kg_month > 0 %} · {% endif %}
-                                {% if eggs_sold_kg_month > 0 %}{{ eggs_sold_kg_month|floatformat:1 }} kg{% endif %}
-                            </h3>
+                        {% if own_sold_pieces_month > 0 or supplier_sold_pieces_month > 0 or own_sold_kg_month > 0 or supplier_sold_kg_month > 0 %}
+                            <h4 class="mb-1" style="font-size: 1.25rem;">
+                                {% with total_pieces=own_sold_pieces_month|add:supplier_sold_pieces_month %}
+                                    {% if total_pieces > 0 %}{{ total_pieces }} pzas{% endif %}
+                                {% endwith %}
+                                {% if own_sold_pieces_month|add:supplier_sold_pieces_month > 0 and own_sold_kg_month|add:supplier_sold_kg_month > 0 %} · {% endif %}
+                                {% with total_kg=own_sold_kg_month|add:supplier_sold_kg_month %}
+                                    {% if total_kg > 0 %}{{ total_kg|floatformat:1 }} kg{% endif %}
+                                {% endwith %}
+                            </h4>
                         {% else %}
                             <h3 class="mb-0 opacity-75">Sin registro</h3>
                         {% endif %}
+                        <div class="mt-2" style="font-size: 0.8rem; line-height: 1.2;">
+                            <span class="opacity-75 d-block"><i class="fas fa-egg me-1"></i>Propia: 
+                                {% if own_sold_pieces_month > 0 %}{{ own_sold_pieces_month }} pzas{% endif %}
+                                {% if own_sold_pieces_month > 0 and own_sold_kg_month > 0 %} · {% endif %}
+                                {% if own_sold_kg_month > 0 %}{{ own_sold_kg_month|floatformat:1 }} kg{% endif %}
+                                {% if own_sold_pieces_month == 0 and own_sold_kg_month == 0 %}0 pzas{% endif %}
+                            </span>
+                            <span class="opacity-75 d-block"><i class="fas fa-truck me-1"></i>Prov. Extra: 
+                                {% if supplier_sold_pieces_month > 0 %}{{ supplier_sold_pieces_month }} pzas{% endif %}
+                                {% if supplier_sold_pieces_month > 0 and supplier_sold_kg_month > 0 %} · {% endif %}
+                                {% if supplier_sold_kg_month > 0 %}{{ supplier_sold_kg_month|floatformat:1 }} kg{% endif %}
+                                {% if supplier_sold_pieces_month == 0 and supplier_sold_kg_month == 0 %}0 pzas{% endif %}
+                            </span>
+                        </div>
                     </div>
                     <i class="fas fa-shopping-basket fa-2x opacity-50"></i>
                 </div>
@@ -185,7 +207,9 @@
                         <thead>
                             <tr>
                                 <th>Mes</th>
-                                <th class="text-end">Ventas</th>
+                                <th class="text-end">Ventas Totales</th>
+                                <th class="text-end">Venta Propia</th>
+                                <th class="text-end">Venta Prov.</th>
                                 <th class="text-end">Gastos</th>
                                 <th class="text-end">Utilidad</th>
                                 <th class="text-end">Prod. (pzas)</th>
@@ -198,6 +222,8 @@
                                 <tr>
                                     <td>{{ month_data.month }}</td>
                                     <td class="text-end text-success">${{ month_data.total_sales|floatformat:2 }}</td>
+                                    <td class="text-end text-muted" style="font-size:0.9rem;">${{ month_data.own_sales|floatformat:2 }}</td>
+                                    <td class="text-end text-muted" style="font-size:0.9rem;">${{ month_data.supplier_sales|floatformat:2 }}</td>
                                     <td class="text-end text-danger">-${{ month_data.total_expenses|floatformat:2 }}</td>
                                     <td class="text-end fw-bold {% if month_data.net_profit >= 0 %}text-primary{% else %}text-danger{% endif %}">${{ month_data.net_profit|floatformat:2 }}</td>
                                     <td class="text-end">{% if month_data.eggs_produced %}{{ month_data.eggs_produced }}{% else %}—{% endif %}</td>
@@ -206,7 +232,7 @@
                                 </tr>
                             {% empty %}
                                 <tr>
-                                    <td colspan="7" class="text-center">No hay datos financieros disponibles.</td>
+                                    <td colspan="9" class="text-center">No hay datos financieros disponibles.</td>
                                 </tr>
                             {% endfor %}
                         </tbody>

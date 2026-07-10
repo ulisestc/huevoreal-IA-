@@ -9,6 +9,7 @@ class Expense(models.Model):
         ('TRANSPORTE', 'Transporte'),
         ('MANTENIMIENTO', 'Mantenimiento'),
         ('TARJETA_CREDITO', 'Tarjeta de Crédito'),
+        ('COMPRA_HUEVO', 'Compra de Huevo a Proveedor'),
         ('OTROS', 'Otros'),
     )
 

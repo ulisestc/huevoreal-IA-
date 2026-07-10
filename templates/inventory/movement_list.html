@@ -33,6 +33,7 @@
                     <tr>
                         <th>Fecha</th>
                         <th>Ubicación</th>
+                        <th>Producto</th>
                         <th>Tipo</th>
                         <th>Cantidad</th>
                         <th>Merma</th>
@@ -41,8 +42,15 @@
                 <tbody>
                     {% for movement in movements %}
                         <tr>
-                            <td>{{ movement.date|date:"d/m/Y" }}</td>
+                            <td>{{ movement.date|date:"d/E/Y" }}</td>
                             <td>{{ movement.location.name }}</td>
+                            <td>
+                                {% if movement.product %}
+                                    {{ movement.product.name }}
+                                {% else %}
+                                    <span class="text-muted">Huevo Propio</span>
+                                {% endif %}
+                            </td>
                             <td>
                                 {% if movement.movement_type == 'PRODUCCION' %}
                                     <span class="badge bg-success">Producción</span>
@@ -87,4 +95,60 @@
         </div>
     </nav>
 {% endif %}
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.querySelector('input[name="q"]');
+        if (searchInput) {
+            let timeout = null;
+            
+            function performSearch(query) {
+                const url = window.location.pathname + '?q=' + encodeURIComponent(query);
+                fetch(url)
+                    .then(res => res.text())
+                    .then(html => {
+                        const parser = new DOMParser();
+                        const doc = parser.parseFromString(html, 'text/html');
+                        
+                        const newTable = doc.querySelector('.table-responsive');
+                        const currentTable = document.querySelector('.table-responsive');
+                        if (newTable && currentTable) {
+                            currentTable.innerHTML = newTable.innerHTML;
+                        }
+                        
+                        // Update pagination
+                        const newNav = doc.querySelector('nav[aria-label="Page navigation"]');
+                        const currentNav = document.querySelector('nav[aria-label="Page navigation"]');
+                        if (currentNav) {
+                            if (newNav) {
+                                currentNav.outerHTML = newNav.outerHTML;
+                            } else {
+                                currentNav.style.display = 'none';
+                            }
+                        } else if (newNav) {
+                            const card = document.querySelector('.card.shadow-sm');
+                            card.insertAdjacentHTML('afterend', newNav.outerHTML);
+                        }
+                        
+                        window.history.replaceState(null, '', url);
+                    });
+            }
+
+            searchInput.addEventListener('input', function() {
+                clearTimeout(timeout);
+                timeout = setTimeout(() => {
+                    performSearch(searchInput.value);
+                }, 300);
+            });
+
+            if (searchInput.form) {
+                searchInput.form.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    clearTimeout(timeout);
+                    performSearch(searchInput.value);
+                });
+            }
+        }
+    });
+</script>
 {% endblock %}

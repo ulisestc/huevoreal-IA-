@@ -22,18 +22,26 @@
                             {{ form.location }}
                             {{ form.location.errors }}
                         </div>
+                        <div class="d-none">
+                            {{ form.product }}
+                        </div>
                     </div>
 
                     <div class="row">
-                        <div class="col-md-6 mb-3">
+                        <div class="col-md-4 mb-3">
                             <label for="{{ form.sale_type.id_for_label }}" class="form-label">Tipo de Venta</label>
                             {{ form.sale_type }}
                             {{ form.sale_type.errors }}
                         </div>
-                        <div class="col-md-6 mb-3">
+                        <div class="col-md-4 mb-3">
                             <label for="{{ form.payment_method.id_for_label }}" class="form-label">Método de Pago</label>
                             {{ form.payment_method }}
                             {{ form.payment_method.errors }}
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="{{ form.delivery_date.id_for_label }}" class="form-label">Fecha de Entrega</label>
+                            {{ form.delivery_date }}
+                            {{ form.delivery_date.errors }}
                         </div>
                     </div>
 
@@ -89,6 +97,23 @@
         const unitPriceInput = document.getElementById('id_unit_price');
         const totalPriceInput = document.getElementById('id_price');
         const labelQtyPiece = document.getElementById('label_qty_piece');
+        const productSelect = document.getElementById('id_product');
+        const productsData = JSON.parse('{{ products_json|safe|default:"{}" }}');
+
+        function onProductChange() {
+            const productId = productSelect.value;
+            if (productId && productsData[productId]) {
+                const prod = productsData[productId];
+                unitPriceInput.value = prod.sale_price;
+                
+                if (prod.unit_type === 'KILO') {
+                    saleTypeSelect.value = 'KILO';
+                } else if (prod.unit_type === 'PIEZA') {
+                    saleTypeSelect.value = 'PIEZA';
+                }
+                toggleFields();
+            }
+        }
 
         function toggleFields() {
             if (saleTypeSelect.value === 'KILO') {
@@ -116,6 +141,10 @@
             let total = qty * price;
             
             totalPriceInput.value = total.toFixed(2);
+        }
+
+        if (productSelect) {
+            productSelect.addEventListener('change', onProductChange);
         }
 
         toggleFields();

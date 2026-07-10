@@ -1,0 +1,178 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-2 mb-3">
+    <h2 class="mb-md-0"><i class="fas fa-redo"></i> Gestión de Suscripciones</h2>
+    <div class="d-flex gap-2">
+        <a href="{% url 'recurring_order_generate_list' %}" class="btn btn-success m-0"><i class="fas fa-magic"></i> Generar Pedidos</a>
+        <a href="{% url 'recurring_order_create' %}" class="btn btn-primary m-0"><i class="fas fa-plus"></i> Nueva Suscripción</a>
+    </div>
+</div>
+
+{% if messages %}
+    {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    {% endfor %}
+{% endif %}
+
+<div class="card shadow-sm mb-4">
+    <div class="card-body">
+        <form method="get" class="d-flex flex-column flex-sm-row gap-2">
+            <div class="flex-grow-1">
+                <input type="text" name="q" class="form-control mb-0" placeholder="Buscar por cliente o producto..." value="{{ request.GET.q|default:'' }}">
+            </div>
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-outline-secondary flex-grow-1 m-0"><i class="fas fa-search"></i> Buscar</button>
+                {% if request.GET.q %}
+                    <a href="{% url 'recurring_order_list' %}" class="btn btn-outline-danger m-0"><i class="fas fa-times"></i></a>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0 align-middle">
+                <thead>
+                    <tr>
+                        <th>Cliente</th>
+                        <th>Cantidad</th>
+                        <th>Frecuencia</th>
+                        <th>Día de Entrega</th>
+                        <th>Última Generación</th>
+                        <th>Estado</th>
+                        <th class="text-end">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for ro in recurring_orders %}
+                        <tr>
+                            <td><strong>{{ ro.customer }}</strong></td>
+                            <td>
+                                {% if ro.sale_type == 'PIEZA' %}
+                                    {{ ro.quantity_piece }} pzas
+                                {% else %}
+                                    {{ ro.quantity_kg }} kg
+                                {% endif %}
+                            </td>
+                            <td>
+                                <span class="badge bg-secondary">{{ ro.get_frequency_display }}</span>
+                            </td>
+                            <td>
+                                {% if ro.frequency == 'SEMANAL' or ro.frequency == 'QUINCENAL' %}
+                                    {{ ro.get_days_display }}
+                                {% elif ro.frequency == 'MENSUAL' %}
+                                    Día {{ ro.day_of_month|default:"-" }} de cada mes
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if ro.last_generated_date %}
+                                    {{ ro.last_generated_date|date:"d/E/Y" }}
+                                {% else %}
+                                    <span class="text-muted">Nunca</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if ro.is_active %}
+                                    <span class="badge bg-success">Activo</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">Inactivo</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-end">
+                                <a href="{% url 'recurring_order_update' ro.id %}" class="btn btn-sm btn-outline-primary me-1"><i class="fas fa-edit"></i></a>
+                                <a href="{% url 'recurring_order_delete' ro.id %}" class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i></a>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="8" class="text-center py-4 text-muted">No hay suscripciones registradas.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{% if is_paginated %}
+    <nav aria-label="Page navigation" class="mt-4">
+        <div class="d-flex justify-content-center gap-3">
+            {% if page_obj.has_previous %}
+                <a class="btn btn-outline-primary" href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}"><i class="fas fa-chevron-left"></i> Anterior</a>
+            {% else %}
+                <button class="btn btn-outline-secondary disabled" disabled><i class="fas fa-chevron-left"></i> Anterior</button>
+            {% endif %}
+
+            {% if page_obj.has_next %}
+                <a class="btn btn-outline-primary" href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}">Siguiente <i class="fas fa-chevron-right"></i></a>
+            {% else %}
+                <button class="btn btn-outline-secondary disabled" disabled>Siguiente <i class="fas fa-chevron-right"></i></button>
+            {% endif %}
+        </div>
+    </nav>
+{% endif %}
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.querySelector('input[name="q"]');
+        if (searchInput) {
+            let timeout = null;
+            
+            function performSearch(query) {
+                const url = window.location.pathname + '?q=' + encodeURIComponent(query);
+                fetch(url)
+                    .then(res => res.text())
+                    .then(html => {
+                        const parser = new DOMParser();
+                        const doc = parser.parseFromString(html, 'text/html');
+                        
+                        const newTable = doc.querySelector('.table-responsive');
+                        const currentTable = document.querySelector('.table-responsive');
+                        if (newTable && currentTable) {
+                            currentTable.innerHTML = newTable.innerHTML;
+                        }
+                        
+                        // Update pagination
+                        const newNav = doc.querySelector('nav[aria-label="Page navigation"]');
+                        const currentNav = document.querySelector('nav[aria-label="Page navigation"]');
+                        if (currentNav) {
+                            if (newNav) {
+                                currentNav.outerHTML = newNav.outerHTML;
+                            } else {
+                                currentNav.style.display = 'none';
+                            }
+                        } else if (newNav) {
+                            const card = document.querySelector('.card.shadow-sm');
+                            card.insertAdjacentHTML('afterend', newNav.outerHTML);
+                        }
+                        
+                        window.history.replaceState(null, '', url);
+                    });
+            }
+
+            searchInput.addEventListener('input', function() {
+                clearTimeout(timeout);
+                timeout = setTimeout(() => {
+                    performSearch(searchInput.value);
+                }, 300);
+            });
+
+            if (searchInput.form) {
+                searchInput.form.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    clearTimeout(timeout);
+                    performSearch(searchInput.value);
+                });
+            }
+        }
+    });
+</script>
+{% endblock %}

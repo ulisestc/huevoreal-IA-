@@ -5,7 +5,7 @@ from .models import Customer, Fraccionamiento, Zona
 class CustomerForm(forms.ModelForm):
     class Meta:
         model = Customer
-        fields = ['first_name', 'last_name', 'address', 'phone_number', 'fraccionamiento', 'zona', 'observaciones', 'seller']
+        fields = ['first_name', 'last_name', 'address', 'phone_number', 'fraccionamiento', 'zona', 'latitude', 'longitude', 'observaciones', 'seller']
         widgets = {
             'first_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nombre'}),
             'last_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Apellido'}),
@@ -13,6 +13,8 @@ class CustomerForm(forms.ModelForm):
             'phone_number': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Teléfono'}),
             'fraccionamiento': forms.Select(attrs={'class': 'form-select'}),
             'zona': forms.Select(attrs={'class': 'form-select'}),
+            'latitude': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Latitud (ej: 19.043)', 'id': 'id_latitude', 'step': '0.000001'}),
+            'longitude': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Longitud (ej: -98.201)', 'id': 'id_longitude', 'step': '0.000001'}),
             'observaciones': forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Ej. 5 piezas a la semana, 10 quincenales, etc.', 'rows': 3}),
             'seller': forms.Select(attrs={'class': 'form-select'}),
         }

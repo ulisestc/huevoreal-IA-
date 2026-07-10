@@ -6,7 +6,7 @@
     <h2><i class="fas fa-hand-holding-usd"></i> Dashboard de Inversores</h2>
     <p class="text-muted mb-2">
         Datos reales del negocio — {{ months_of_data }} mes{{ months_of_data|pluralize:"es" }} de historial operativo
-        ({{ data_start|date:"d/m/Y" }} &ndash; {{ data_end|date:"d/m/Y" }})
+        ({{ data_start|date:"d/E/Y" }} &ndash; {{ data_end|date:"d/E/Y" }})
     </p>
     {% if months_of_data == 0 %}
         <div class="alert alert-danger">
@@ -43,7 +43,11 @@
             <div class="card-body">
                 <h6 class="text-uppercase mb-1" style="font-size:0.72rem;">Ingreso Mensual Promedio</h6>
                 <h3 class="mb-0">${{ avg_monthly_sales|floatformat:2 }}</h3>
-                <small class="opacity-75">promedio real / mes</small>
+                <div class="mt-2 mb-1" style="font-size: 0.78rem; line-height: 1.2;">
+                    <span class="opacity-75 d-block"><i class="fas fa-egg me-1"></i>Propia: ${{ avg_monthly_sales_own|floatformat:2 }}</span>
+                    <span class="opacity-75 d-block"><i class="fas fa-truck me-1"></i>Prov. Extra: ${{ avg_monthly_sales_supplier|floatformat:2 }}</span>
+                </div>
+                <small class="opacity-75" style="font-size: 0.7rem;">promedio real / mes</small>
             </div>
         </div>
     </div>
@@ -52,16 +56,22 @@
             <div class="card-body">
                 <h6 class="text-uppercase mb-1" style="font-size:0.72rem;">Utilidad Mensual Promedio</h6>
                 <h3 class="mb-0">${{ avg_monthly_profit|floatformat:2 }}</h3>
-                <small class="opacity-75">ingreso &minus; gastos</small>
+                <div class="mt-2 mb-1" style="font-size: 0.78rem; line-height: 1.2;">
+                    <span class="opacity-75 d-block"><i class="fas fa-egg me-1"></i>Propia: ${{ avg_monthly_profit_own|floatformat:2 }}</span>
+                    <span class="opacity-75 d-block"><i class="fas fa-truck me-1"></i>Prov. Extra: ${{ avg_monthly_profit_supplier|floatformat:2 }}</span>
+                </div>
+                <small class="opacity-75" style="font-size: 0.7rem;">ingreso &minus; gastos</small>
             </div>
         </div>
     </div>
     <div class="col-12 col-md-4">
         <div class="card text-white shadow h-100" style="background:#1a6b3a;">
-            <div class="card-body">
-                <h6 class="text-uppercase mb-1" style="font-size:0.72rem;">Margen de Ganancia</h6>
-                <h3 class="mb-0">{{ profit_margin_pct|floatformat:1 }}%</h3>
-                <small class="opacity-75">sobre ventas totales</small>
+            <div class="card-body bg-opacity-10 d-flex flex-column justify-content-between h-100">
+                <div>
+                    <h6 class="text-uppercase mb-1" style="font-size:0.72rem;">Margen de Ganancia</h6>
+                    <h3 class="mb-0">{{ profit_margin_pct|floatformat:1 }}%</h3>
+                </div>
+                <small class="opacity-75 d-block mt-3">sobre ventas totales</small>
             </div>
         </div>
     </div>
@@ -134,6 +144,55 @@
     </div>
 </div>
 
+<!-- Detailed Monthly Table -->
+<div class="card shadow mb-4">
+    <div class="card-header text-white" style="background:#2c3e50;">
+        <h5 class="mb-0"><i class="fas fa-table"></i> Desglose de Operaciones Mensuales</h5>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-striped table-hover mb-0 align-middle">
+                <thead>
+                    <tr class="table-dark">
+                        <th>Mes</th>
+                        <th class="text-end">Ingresos Totales</th>
+                        <th class="text-end">Ingreso Propio</th>
+                        <th class="text-end">Ingreso Prov. Extra</th>
+                        <th class="text-end">Costo Prov. (COGS)</th>
+                        <th class="text-end">Gastos Granja</th>
+                        <th class="text-end">Utilidad Neta</th>
+                        <th class="text-end">Utilidad Prov. Extra</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for m in monthly_data %}
+                        <tr>
+                            <td><strong>{{ m.month }}</strong></td>
+                            <td class="text-end text-success fw-bold">${{ m.sales|floatformat:2 }}</td>
+                            <td class="text-end text-muted">${{ m.sales_own|floatformat:2 }}</td>
+                            <td class="text-end text-muted">${{ m.sales_supplier|floatformat:2 }}</td>
+                            <td class="text-end text-danger">${{ m.cost_supplier|floatformat:2 }}</td>
+                            <td class="text-end text-danger">-${{ m.expenses|floatformat:2 }}</td>
+                            <td class="text-end fw-bold {% if m.profit >= 0 %}text-primary{% else %}text-danger{% endif %}">${{ m.profit|floatformat:2 }}</td>
+                            <td class="text-end fw-bold text-success">
+                                {% if m.sales_supplier > 0 %}
+                                    ${{ m.profit_supplier|floatformat:2 }}
+                                {% else %}
+                                    —
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="8" class="text-center py-4">No hay datos financieros registrados.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
 <!-- ROI Calculator -->
 <div class="card shadow mb-4">
     <div class="card-header bg-primary text-white">
@@ -199,7 +258,7 @@
                         <p class="text-muted mb-0" style="font-size:0.78rem;">
                             <i class="fas fa-exclamation-circle"></i>
                             Proyección basada en historial de <strong>{{ months_of_data }} meses reales</strong>
-                            ({{ data_start|date:"d/m/Y" }} – {{ data_end|date:"d/m/Y" }}).
+                            ({{ data_start|date:"d/E/Y" }} – {{ data_end|date:"d/E/Y" }}).
                             Las condiciones del mercado pueden variar.
                         </p>
                     </div>
@@ -231,11 +290,29 @@
                 labels: monthlyData.map(m => m.month),
                 datasets: [
                     {
-                        label: 'Ingresos ($)',
+                        label: 'Ingresos Totales ($)',
                         data: monthlyData.map(m => m.sales),
                         borderColor: '#27ae60',
                         backgroundColor: 'rgba(39,174,96,0.1)',
-                        borderWidth: 2,
+                        borderWidth: 2.5,
+                        tension: 0.3,
+                        fill: false,
+                    },
+                    {
+                        label: 'Venta Propia ($)',
+                        data: monthlyData.map(m => m.sales_own),
+                        borderColor: '#2ecc71',
+                        borderDash: [5, 5],
+                        borderWidth: 1.5,
+                        tension: 0.3,
+                        fill: false,
+                    },
+                    {
+                        label: 'Venta Proveedor ($)',
+                        data: monthlyData.map(m => m.sales_supplier),
+                        borderColor: '#f1c40f',
+                        borderDash: [5, 5],
+                        borderWidth: 1.5,
                         tension: 0.3,
                         fill: false,
                     },

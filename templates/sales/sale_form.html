@@ -22,6 +22,9 @@
                             {{ form.location }}
                             {{ form.location.errors }}
                         </div>
+                        <div class="d-none">
+                            {{ form.product }}
+                        </div>
                     </div>
 
                     <div class="row">
@@ -60,7 +63,15 @@
                     </div>
 
                     <div class="row">
-                        <div class="col-md-6 mb-3">
+                        <div class="col-md-4 mb-3">
+                            <label for="{{ form.cost_price.id_for_label }}" class="form-label">Precio de Costo</label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                {{ form.cost_price }}
+                            </div>
+                            {{ form.cost_price.errors }}
+                        </div>
+                        <div class="col-md-4 mb-3">
                             <label for="{{ form.unit_price.id_for_label }}" class="form-label">Precio Unitario</label>
                             <div class="input-group">
                                 <span class="input-group-text">$</span>
@@ -68,7 +79,7 @@
                             </div>
                             {{ form.unit_price.errors }}
                         </div>
-                        <div class="col-md-6 mb-3">
+                        <div class="col-md-4 mb-3">
                             <label for="{{ form.price.id_for_label }}" class="form-label">Precio Total (Calculado)</label>
                             <div class="input-group">
                                 <span class="input-group-text">$</span>
@@ -121,11 +132,30 @@
         const qtyKgInput = document.getElementById('id_quantity_kg');
         const qtyPieceInput = document.getElementById('id_quantity_piece');
         const unitPriceInput = document.getElementById('id_unit_price');
+        const costPriceInput = document.getElementById('id_cost_price');
         const totalPriceInput = document.getElementById('id_price');
         const amountPaidInput = document.getElementById('id_amount_paid');
         const isPaidCheckbox = document.getElementById('id_is_paid');
         const labelQtyPiece = document.getElementById('label_qty_piece');
         const helpQtyPiece = document.getElementById('help_qty_piece');
+        const productSelect = document.getElementById('id_product');
+        const productsData = JSON.parse('{{ products_json|safe|default:"{}" }}');
+
+        function onProductChange() {
+            const productId = productSelect.value;
+            if (productId && productsData[productId]) {
+                const prod = productsData[productId];
+                unitPriceInput.value = prod.sale_price;
+                costPriceInput.value = prod.cost_price;
+                
+                if (prod.unit_type === 'KILO') {
+                    saleTypeSelect.value = 'KILO';
+                } else if (prod.unit_type === 'PIEZA') {
+                    saleTypeSelect.value = 'PIEZA';
+                }
+                toggleFields();
+            }
+        }
 
         function toggleFields() {
             if (saleTypeSelect.value === 'KILO') {
@@ -162,20 +192,15 @@
             const total = parseFloat(totalPriceInput.value) || 0;
             const paid = parseFloat(amountPaidInput.value) || 0;
             
-            // If user explicitly unchecks, we don't force it back immediately unless numbers change
-            // But if amounts indicate partial, we should update UI or user expectation
-            // Logic: if paid < total, is_paid CANNOT be true (unless user forces it, but here we want to help)
-            // If paid >= total, is_paid should be true.
-            
             if (paid < total && paid > 0) {
-               // Partial
-               // The requirement says "in is_paid it must say partially". 
-               // In the form, is_paid is a checkbox. We can't make a checkbox say "partially".
-               // But we can uncheck it to signify "Not Fully Paid".
                isPaidCheckbox.checked = false; 
             } else if (paid >= total && total > 0) {
                isPaidCheckbox.checked = true;
             }
+        }
+
+        if (productSelect) {
+            productSelect.addEventListener('change', onProductChange);
         }
 
         toggleFields();
@@ -186,7 +211,6 @@
         unitPriceInput.addEventListener('input', calculateTotal);
         amountPaidInput.addEventListener('input', checkPaymentStatus);
         
-        // Also run on load to set initial state correctly if editing
         checkPaymentStatus();
     });
 </script>

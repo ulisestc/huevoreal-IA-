@@ -74,7 +74,7 @@
                     {% for sale in sales %}
                         <tr>
                             <td>
-                                {{ sale.day|date:"d/m/Y" }}<br>
+                                {{ sale.day|date:"d/E/Y" }}<br>
                                 <small class="text-muted">{{ sale.day_of_week }}</small>
                             </td>
                             <td>{{ sale.customer }}</td>
@@ -90,7 +90,7 @@
                             <td>${{ sale.price }}</td>
                             <td>
                                 <span class="badge bg-light text-dark border">{{ sale.get_payment_method_display }}</span><br>
-                                <small class="text-muted">{{ sale.payment_date|date:"d/m/Y" }}</small>
+                                <small class="text-muted">{{ sale.payment_date|date:"d/E/Y" }}</small>
                             </td>
                             <td>
                                 {% if sale.payment_status == 'PAGADO' %}
@@ -134,4 +134,60 @@
         </div>
     </nav>
 {% endif %}
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.querySelector('input[name="q"]');
+        if (searchInput) {
+            let timeout = null;
+            
+            function performSearch(query) {
+                const url = window.location.pathname + '?q=' + encodeURIComponent(query);
+                fetch(url)
+                    .then(res => res.text())
+                    .then(html => {
+                        const parser = new DOMParser();
+                        const doc = parser.parseFromString(html, 'text/html');
+                        
+                        const newTable = doc.querySelector('.table-responsive');
+                        const currentTable = document.querySelector('.table-responsive');
+                        if (newTable && currentTable) {
+                            currentTable.innerHTML = newTable.innerHTML;
+                        }
+                        
+                        // Update pagination
+                        const newNav = doc.querySelector('nav[aria-label="Page navigation"]');
+                        const currentNav = document.querySelector('nav[aria-label="Page navigation"]');
+                        if (currentNav) {
+                            if (newNav) {
+                                currentNav.outerHTML = newNav.outerHTML;
+                            } else {
+                                currentNav.style.display = 'none';
+                            }
+                        } else if (newNav) {
+                            const card = document.querySelector('.card.shadow-sm');
+                            card.insertAdjacentHTML('afterend', newNav.outerHTML);
+                        }
+                        
+                        window.history.replaceState(null, '', url);
+                    });
+            }
+
+            searchInput.addEventListener('input', function() {
+                clearTimeout(timeout);
+                timeout = setTimeout(() => {
+                    performSearch(searchInput.value);
+                }, 300);
+            });
+
+            if (searchInput.form) {
+                searchInput.form.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    clearTimeout(timeout);
+                    performSearch(searchInput.value);
+                });
+            }
+        }
+    });
+</script>
 {% endblock %}

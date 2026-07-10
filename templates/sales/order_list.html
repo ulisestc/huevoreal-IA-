@@ -21,7 +21,7 @@
             <table class="table table-hover mb-0 align-middle">
                 <thead>
                     <tr>
-                        <th>Fecha Creación</th>
+                        <th>Fecha de Entrega</th>
                         <th>Cliente</th>
                         <th>Ubicación</th>
                         <th>Tipo</th>
@@ -35,7 +35,7 @@
                 <tbody>
                     {% for order in orders %}
                         <tr>
-                            <td>{{ order.created_at|date:"d/m/Y H:i" }}</td>
+                            <td>{{ order.delivery_date|date:"d/E/Y"|default:"-" }}</td>
                             <td>{{ order.customer }}</td>
                             <td>{{ order.location|default:"-" }}</td>
                             <td>{{ order.get_sale_type_display }}</td>
@@ -50,12 +50,9 @@
                             <td>${{ order.total_price }}</td>
                             <td>{{ order.seller }}</td>
                             <td>
-                                <form action="{% url 'order_complete' order.pk %}" method="post" class="d-inline">
-                                    {% csrf_token %}
-                                    <button type="submit" class="btn btn-sm btn-success" onclick="return confirm('¿Confirmar que el pedido ha sido realizado? Se convertirá en una venta.')">
-                                        <i class="fas fa-check"></i> Realizado
-                                    </button>
-                                </form>
+                                <button type="button" class="btn btn-sm btn-success btn-complete-order" data-order-id="{{ order.pk }}" data-customer-name="{{ order.customer }}">
+                                    <i class="fas fa-check"></i> Realizado
+                                </button>
                             </td>
                         </tr>
                     {% empty %}
@@ -68,4 +65,48 @@
         </div>
     </div>
 </div>
+
+<!-- Order Completion Confirmation Modal -->
+<div class="modal fade" id="confirmOrderModal" tabindex="-1" aria-labelledby="confirmOrderModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content shadow">
+      <div class="modal-header bg-light">
+        <h5 class="modal-title" id="confirmOrderModalLabel"><i class="fas fa-clipboard-check text-success me-2"></i> Completar Pedido</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body py-4 fs-5">
+        ¿Confirmar que el pedido del cliente <strong id="confirm-customer-name"></strong> ha sido realizado? Se convertirá en una venta y se actualizará el inventario.
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary px-4 m-0" data-bs-dismiss="modal">Cancelar</button>
+        <form id="complete-order-form" method="post" action="" class="d-inline">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-success px-4 m-0">Confirmar</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const confirmModalEl = document.getElementById('confirmOrderModal');
+        const confirmModal = new bootstrap.Modal(confirmModalEl);
+        const confirmForm = document.getElementById('complete-order-form');
+        const customerNameSpan = document.getElementById('confirm-customer-name');
+
+        document.querySelectorAll('.btn-complete-order').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const orderId = btn.getAttribute('data-order-id');
+                const customerName = btn.getAttribute('data-customer-name');
+                
+                // Set form action and customer name
+                confirmForm.action = `/sales/orders/${orderId}/complete/`;
+                customerNameSpan.innerText = customerName;
+                
+                confirmModal.show();
+            });
+        });
+    });
+</script>
 {% endblock %}

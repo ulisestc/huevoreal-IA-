@@ -122,7 +122,7 @@ USE_I18N = True
 USE_TZ = True
 
 # Date Formats
-DATE_FORMAT = 'd/m/Y'
+DATE_FORMAT = 'd/E/Y'
 DATE_INPUT_FORMATS = ['%d/%m/%Y']
 
 

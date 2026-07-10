@@ -32,6 +32,8 @@ class Customer(models.Model):
     seller = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Vendedor")
     fraccionamiento = models.ForeignKey(Fraccionamiento, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Fraccionamiento")
     zona = models.ForeignKey(Zona, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Zona")
+    latitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True, verbose_name="Latitud")
+    longitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True, verbose_name="Longitud")
 
     class Meta:
         verbose_name = "Cliente"

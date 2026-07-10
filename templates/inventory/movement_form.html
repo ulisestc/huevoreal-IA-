@@ -17,6 +17,10 @@
                         {{ form.location.errors }}
                     </div>
 
+                    <div class="mb-3 d-none">
+                        {{ form.product }}
+                    </div>
+
                     <div class="mb-3">
                         <label for="{{ form.movement_type.id_for_label }}" class="form-label">Tipo de Movimiento</label>
                         {{ form.movement_type }}

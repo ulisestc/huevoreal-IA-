@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6 col-lg-4">
+        <div class="card shadow border-danger">
+            <div class="card-header bg-danger text-white">
+                <h3 class="mb-0">Eliminar Proveedor</h3>
+            </div>
+            <div class="card-body">
+                <p>¿Estás seguro de que deseas eliminar al proveedor <strong>{{ object.name }}</strong>?</p>
+                <div class="alert alert-warning text-dark small">
+                    <i class="fas fa-exclamation-triangle"></i> Eliminar este proveedor podría causar errores en los productos y registros asociados.
+                </div>
+                
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-danger btn-lg">Sí, Eliminar</button>
+                        <a href="{% url 'supplier_list' %}" class="btn btn-secondary btn-lg">Cancelar</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

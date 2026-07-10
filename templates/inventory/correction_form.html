@@ -8,14 +8,29 @@
                 <h3 class="mb-0">Corrección de Inventario: {{ location.name }}</h3>
             </div>
             <div class="card-body">
-                <div class="alert alert-info">
-                    Cantidad actual en sistema: <strong>{{ current_quantity }}</strong>
+                <div class="card bg-light mb-3">
+                    <div class="card-body py-2">
+                        <h6 class="card-subtitle mb-2 text-muted">Cantidades actuales en sistema:</h6>
+                        <ul class="mb-0">
+                            {% for inv in inventories %}
+                                <li>{{ inv.product.name }}: <strong>{{ inv.quantity }}</strong></li>
+                            {% empty %}
+                                <li class="text-muted">No hay existencias registradas</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
                 </div>
-                <p>Ingrese la cantidad real que hay físicamente. El sistema generará un movimiento de ajuste automáticamente.</p>
+                <p>Seleccione el producto y la cantidad física real detectada. El sistema calculará el ajuste automáticamente.</p>
                 
                 <form method="post">
                     {% csrf_token %}
                     
+                    <div class="mb-3">
+                        <label for="{{ form.product.id_for_label }}" class="form-label">Producto</label>
+                        {{ form.product }}
+                        {{ form.product.errors }}
+                    </div>
+
                     <div class="mb-3">
                         <label for="{{ form.real_quantity.id_for_label }}" class="form-label">Cantidad Real (Físico)</label>
                         {{ form.real_quantity }}

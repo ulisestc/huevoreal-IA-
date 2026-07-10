@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6 col-lg-4">
+        <div class="card shadow border-danger">
+            <div class="card-header bg-danger text-white">
+                <h3 class="mb-0">Eliminar Producto</h3>
+            </div>
+            <div class="card-body">
+                <p>¿Estás seguro de que deseas eliminar el producto <strong>{{ object.name }}</strong> del catálogo?</p>
+                <div class="alert alert-warning text-dark small">
+                    <i class="fas fa-exclamation-triangle"></i> Eliminar este producto podría causar errores en los registros de ventas o inventario previos que hagan referencia a él.
+                </div>
+                
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-danger btn-lg">Sí, Eliminar</button>
+                        <a href="{% url 'product_list' %}" class="btn btn-secondary btn-lg">Cancelar</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
