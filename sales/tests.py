@@ -97,7 +97,7 @@ class SalesTestCase(TestCase):
         inv = Inventory.objects.create(
             location=self.location,
             product=self.product_kg,
-            quantity=100.00
+            quantity=200
         )
         
         # Create order for KILO product
@@ -107,6 +107,7 @@ class SalesTestCase(TestCase):
             product=self.product_kg,
             sale_type='KILO',
             quantity_kg=10.00,
+            quantity_piece=160,
             unit_price=120.00,
             total_price=1200.00,
             payment_method='EFECTIVO',
@@ -123,9 +124,9 @@ class SalesTestCase(TestCase):
         order.refresh_from_db()
         self.assertEqual(order.status, 'COMPLETADO')
         
-        # Check inventory is subtracted correctly by 10.00 kg
+        # Check inventory is subtracted correctly by 10.00 kg (10 * 16 = 160 pieces)
         inv.refresh_from_db()
-        self.assertEqual(inv.quantity, 90.00)
+        self.assertEqual(inv.quantity, 40)
 
     def test_recurring_order_views(self):
         ro = RecurringOrder.objects.create(

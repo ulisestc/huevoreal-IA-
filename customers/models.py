@@ -29,7 +29,6 @@ class Customer(models.Model):
     address = models.CharField(max_length=255, verbose_name="Dirección")
     phone_number = models.CharField(max_length=20, verbose_name="Teléfono")
     observaciones = models.TextField(blank=True, verbose_name="Observaciones")
-    seller = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Vendedor")
     fraccionamiento = models.ForeignKey(Fraccionamiento, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Fraccionamiento")
     zona = models.ForeignKey(Zona, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Zona")
     latitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True, verbose_name="Latitud")

@@ -1,11 +1,10 @@
 from django import forms
-from django.contrib.auth import get_user_model
 from .models import Customer, Fraccionamiento, Zona
 
 class CustomerForm(forms.ModelForm):
     class Meta:
         model = Customer
-        fields = ['first_name', 'last_name', 'address', 'phone_number', 'fraccionamiento', 'zona', 'latitude', 'longitude', 'observaciones', 'seller']
+        fields = ['first_name', 'last_name', 'address', 'phone_number', 'fraccionamiento', 'zona', 'latitude', 'longitude', 'observaciones']
         widgets = {
             'first_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nombre'}),
             'last_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Apellido'}),
@@ -16,16 +15,10 @@ class CustomerForm(forms.ModelForm):
             'latitude': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Latitud (ej: 19.043)', 'id': 'id_latitude', 'step': '0.000001'}),
             'longitude': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Longitud (ej: -98.201)', 'id': 'id_longitude', 'step': '0.000001'}),
             'observaciones': forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Ej. 5 piezas a la semana, 10 quincenales, etc.', 'rows': 3}),
-            'seller': forms.Select(attrs={'class': 'form-select'}),
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        User = get_user_model()
-        self.fields['seller'].queryset = User.objects.all().order_by('username')
-        self.fields['seller'].empty_label = "Seleccione un vendedor..."
-        self.fields['seller'].required = False
-        
         self.fields['fraccionamiento'].queryset = Fraccionamiento.objects.all().order_by('name')
         self.fields['fraccionamiento'].empty_label = "Seleccione un fraccionamiento..."
         self.fields['fraccionamiento'].required = False

@@ -66,11 +66,9 @@ class SaleCreateView(LoginRequiredMixin, CreateView):
 
     def form_valid(self, form):
         form.instance.seller = self.request.user
-        if not form.instance.cost_price and form.instance.product:
-            form.instance.cost_price = form.instance.product.cost_price
         response = super().form_valid(form)
         sale = self.object
-        qty_to_subtract = sale.quantity_piece if sale.sale_type == 'PIEZA' else sale.quantity_kg
+        qty_to_subtract = sale.quantity_piece
         if qty_to_subtract and qty_to_subtract > 0 and sale.location and sale.product:
             with transaction.atomic():
                 inventory, _ = Inventory.objects.get_or_create(location=sale.location, product=sale.product, defaults={'quantity': 0})
@@ -100,19 +98,15 @@ class SaleUpdateView(LoginRequiredMixin, UpdateView):
 
     def form_valid(self, form):
         old_sale = Sale.objects.get(pk=self.object.pk)
-        if not form.instance.cost_price and form.instance.product:
-            form.instance.cost_price = form.instance.product.cost_price
         response = super().form_valid(form)
         new_sale = self.object
         with transaction.atomic():
-            old_qty = old_sale.quantity_piece if old_sale.sale_type == 'PIEZA' else old_sale.quantity_kg
+            old_qty = old_sale.quantity_piece
             if old_sale.location and old_qty and old_qty > 0 and old_sale.product:
                 inv_old, _ = Inventory.objects.get_or_create(location=old_sale.location, product=old_sale.product, defaults={'quantity': 0})
-                inv_old.quantity += inv_old.product.cost_price * 0 # Just typing correct Decimal math fallback
-                # Wait, quantity is DecimalField or FloatField, adding Decimal/Float directly is fine.
                 inv_old.quantity += old_qty
                 inv_old.save()
-            new_qty = new_sale.quantity_piece if new_sale.sale_type == 'PIEZA' else new_sale.quantity_kg
+            new_qty = new_sale.quantity_piece
             if new_sale.location and new_qty and new_qty > 0 and new_sale.product:
                 inv_new, _ = Inventory.objects.get_or_create(location=new_sale.location, product=new_sale.product, defaults={'quantity': 0})
                 inv_new.quantity -= new_qty
@@ -188,7 +182,7 @@ def complete_order(request, pk):
         quantity_kg=order.quantity_kg,
         quantity_piece=order.quantity_piece,
         unit_price=order.unit_price,
-        cost_price=order.product.cost_price if order.product else 0,
+        cost_price=0,
         price=order.total_price,
         amount_paid=order.total_price,
         is_paid=True,
@@ -198,7 +192,7 @@ def complete_order(request, pk):
     )
     
     # Update Inventory
-    qty_to_subtract = sale.quantity_piece if sale.sale_type == 'PIEZA' else sale.quantity_kg
+    qty_to_subtract = sale.quantity_piece
     if qty_to_subtract and qty_to_subtract > 0 and sale.location and sale.product:
         inventory, _ = Inventory.objects.get_or_create(location=sale.location, product=sale.product, defaults={'quantity': 0})
         inventory.quantity -= qty_to_subtract

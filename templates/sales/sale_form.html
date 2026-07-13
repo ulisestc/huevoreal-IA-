@@ -63,15 +63,7 @@
                     </div>
 
                     <div class="row">
-                        <div class="col-md-4 mb-3">
-                            <label for="{{ form.cost_price.id_for_label }}" class="form-label">Precio de Costo</label>
-                            <div class="input-group">
-                                <span class="input-group-text">$</span>
-                                {{ form.cost_price }}
-                            </div>
-                            {{ form.cost_price.errors }}
-                        </div>
-                        <div class="col-md-4 mb-3">
+                        <div class="col-md-6 mb-3">
                             <label for="{{ form.unit_price.id_for_label }}" class="form-label">Precio Unitario</label>
                             <div class="input-group">
                                 <span class="input-group-text">$</span>
@@ -79,7 +71,7 @@
                             </div>
                             {{ form.unit_price.errors }}
                         </div>
-                        <div class="col-md-4 mb-3">
+                        <div class="col-md-6 mb-3">
                             <label for="{{ form.price.id_for_label }}" class="form-label">Precio Total (Calculado)</label>
                             <div class="input-group">
                                 <span class="input-group-text">$</span>
@@ -132,7 +124,6 @@
         const qtyKgInput = document.getElementById('id_quantity_kg');
         const qtyPieceInput = document.getElementById('id_quantity_piece');
         const unitPriceInput = document.getElementById('id_unit_price');
-        const costPriceInput = document.getElementById('id_cost_price');
         const totalPriceInput = document.getElementById('id_price');
         const amountPaidInput = document.getElementById('id_amount_paid');
         const isPaidCheckbox = document.getElementById('id_is_paid');
@@ -146,7 +137,6 @@
             if (productId && productsData[productId]) {
                 const prod = productsData[productId];
                 unitPriceInput.value = prod.sale_price;
-                costPriceInput.value = prod.cost_price;
                 
                 if (prod.unit_type === 'KILO') {
                     saleTypeSelect.value = 'KILO';
