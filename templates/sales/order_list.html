@@ -50,9 +50,14 @@
                             <td>${{ order.total_price }}</td>
                             <td>{{ order.seller }}</td>
                             <td>
-                                <button type="button" class="btn btn-sm btn-success btn-complete-order" data-order-id="{{ order.pk }}" data-customer-name="{{ order.customer }}">
-                                    <i class="fas fa-check"></i> Realizado
-                                </button>
+                                <div class="d-flex gap-1">
+                                    <button type="button" class="btn btn-sm btn-success btn-complete-order" data-order-id="{{ order.pk }}" data-customer-name="{{ order.customer }}">
+                                        <i class="fas fa-check"></i> Realizado
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-danger btn-cancel-order" data-order-id="{{ order.pk }}" data-customer-name="{{ order.customer }}">
+                                        <i class="fas fa-times"></i> Cancelar
+                                    </button>
+                                </div>
                             </td>
                         </tr>
                     {% empty %}
@@ -88,6 +93,28 @@
   </div>
 </div>
 
+<!-- Order Cancellation Confirmation Modal -->
+<div class="modal fade" id="cancelOrderModal" tabindex="-1" aria-labelledby="cancelOrderModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content shadow">
+      <div class="modal-header bg-light">
+        <h5 class="modal-title" id="cancelOrderModalLabel"><i class="fas fa-times-circle text-danger me-2"></i> Cancelar Pedido</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body py-4 fs-5">
+        ¿Confirmar que deseas cancelar el pedido del cliente <strong id="cancel-customer-name"></strong>?
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary px-4 m-0" data-bs-dismiss="modal">Cerrar</button>
+        <form id="cancel-order-form" method="post" action="" class="d-inline">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger px-4 m-0">Confirmar Cancelación</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const confirmModalEl = document.getElementById('confirmOrderModal');
@@ -105,6 +132,24 @@
                 customerNameSpan.innerText = customerName;
                 
                 confirmModal.show();
+            });
+        });
+
+        const cancelModalEl = document.getElementById('cancelOrderModal');
+        const cancelModal = new bootstrap.Modal(cancelModalEl);
+        const cancelForm = document.getElementById('cancel-order-form');
+        const cancelCustomerNameSpan = document.getElementById('cancel-customer-name');
+
+        document.querySelectorAll('.btn-cancel-order').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const orderId = btn.getAttribute('data-order-id');
+                const customerName = btn.getAttribute('data-customer-name');
+                
+                // Set form action and customer name
+                cancelForm.action = `/sales/orders/${orderId}/cancel/`;
+                cancelCustomerNameSpan.innerText = customerName;
+                
+                cancelModal.show();
             });
         });
     });

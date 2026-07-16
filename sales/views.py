@@ -208,6 +208,22 @@ def complete_order(request, pk):
         return redirect(referer)
     return redirect('order_list')
 
+@transaction.atomic
+def cancel_order(request, pk):
+    order = get_object_or_404(Order, pk=pk)
+    if order.status != 'PENDIENTE':
+        messages.error(request, "Este pedido ya no está pendiente.")
+        return redirect('order_list')
+    
+    order.status = 'CANCELADO'
+    order.save()
+    
+    messages.success(request, f"Pedido #{order.id} cancelado exitosamente.")
+    referer = request.META.get('HTTP_REFERER')
+    if referer:
+        return redirect(referer)
+    return redirect('order_list')
+
 class StatisticsView(LoginRequiredMixin, TemplateView):
     template_name = 'sales/statistics.html'
 

@@ -12,6 +12,7 @@ urlpatterns = [
     path('orders/', views.OrderListView.as_view(), name='order_list'),
     path('orders/create/', views.OrderCreateView.as_view(), name='order_create'),
     path('orders/<int:pk>/complete/', views.complete_order, name='order_complete'),
+    path('orders/<int:pk>/cancel/', views.cancel_order, name='order_cancel'),
 
     # Recurring Orders
     path('recurring/', views.RecurringOrderListView.as_view(), name='recurring_order_list'),

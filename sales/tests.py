@@ -128,6 +128,27 @@ class SalesTestCase(TestCase):
         inv.refresh_from_db()
         self.assertEqual(inv.quantity, 40)
 
+    def test_order_cancellation(self):
+        order = Order.objects.create(
+            customer=self.customer,
+            location=self.location,
+            product=self.product_piece,
+            sale_type='PIEZA',
+            quantity_piece=10,
+            unit_price=10.00,
+            total_price=100.00,
+            payment_method='EFECTIVO',
+            status='PENDIENTE',
+            delivery_date=timezone.now().date(),
+            seller=self.user
+        )
+        
+        self.client.login(username='testuser', password='password')
+        self.client.post(f'/sales/orders/{order.pk}/cancel/')
+        
+        order.refresh_from_db()
+        self.assertEqual(order.status, 'CANCELADO')
+
     def test_recurring_order_views(self):
         ro = RecurringOrder.objects.create(
             customer=self.customer,
