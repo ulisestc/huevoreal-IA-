@@ -68,6 +68,21 @@
                             </td>
                             <td>
                                 <div class="d-flex gap-1">
+                                    <button class="btn btn-sm btn-secondary btn-view-customer" 
+                                            title="Ver Detalles"
+                                            data-bs-toggle="modal" 
+                                            data-bs-target="#customerDetailModal"
+                                            data-first-name="{{ customer.first_name }}"
+                                            data-last-name="{{ customer.last_name|default:'' }}"
+                                            data-phone="{{ customer.phone_number }}"
+                                            data-address="{{ customer.address }}"
+                                            data-fraccionamiento="{{ customer.fraccionamiento.name|default:'—' }}"
+                                            data-zona="{{ customer.zona.name|default:'—' }}"
+                                            data-lat="{{ customer.latitude|default:'' }}"
+                                            data-lng="{{ customer.longitude|default:'' }}"
+                                            data-obs="{{ customer.observaciones|default:'Sin observaciones' }}">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
                                     <a href="{% url 'customer_update' customer.pk %}" class="btn btn-sm btn-info text-white" title="Editar"><i class="fas fa-edit"></i></a>
                                     <a href="{% url 'customer_delete' customer.pk %}" class="btn btn-sm btn-danger" title="Eliminar"><i class="fas fa-trash"></i></a>
                                 </div>
@@ -101,6 +116,49 @@
         </div>
     </nav>
 {% endif %}
+
+<!-- Modal de Detalles del Cliente -->
+<div class="modal fade" id="customerDetailModal" tabindex="-1" aria-labelledby="customerDetailModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content shadow-lg border-0">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="customerDetailModalLabel"><i class="fas fa-user-tag me-2"></i>Detalles del Cliente</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="mb-4 text-center">
+                    <h3 class="fw-bold mb-1 text-dark" id="modal-customer-name"></h3>
+                    <span class="badge bg-light text-muted border" id="modal-customer-phone-badge"></span>
+                </div>
+                <div class="row g-3">
+                    <div class="col-12">
+                        <label class="form-label text-muted mb-0 small uppercase fw-bold">Dirección</label>
+                        <p class="mb-0 text-dark" id="modal-customer-address"></p>
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label text-muted mb-0 small uppercase fw-bold">Fraccionamiento</label>
+                        <p class="mb-0 text-dark fw-semibold" id="modal-customer-fraccionamiento"></p>
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label text-muted mb-0 small uppercase fw-bold">Zona</label>
+                        <p class="mb-0 text-dark fw-semibold" id="modal-customer-zona"></p>
+                    </div>
+                    <div class="col-12" id="modal-coords-div">
+                        <label class="form-label text-muted mb-0 small uppercase fw-bold">Coordenadas GPS</label>
+                        <p class="mb-0 text-dark text-monospace" id="modal-customer-coords"></p>
+                    </div>
+                    <div class="col-12 border-top pt-3 mt-3">
+                        <label class="form-label text-muted mb-0 small uppercase fw-bold">Observaciones</label>
+                        <p class="mb-0 text-dark" id="modal-customer-observaciones" style="white-space: pre-wrap;"></p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer bg-light border-0">
+                <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
@@ -154,6 +212,38 @@
                     performSearch(searchInput.value);
                 });
             }
+        }
+
+        const customerDetailModal = document.getElementById('customerDetailModal');
+        if (customerDetailModal) {
+            customerDetailModal.addEventListener('show.bs.modal', function(event) {
+                const button = event.relatedTarget;
+                const firstName = button.getAttribute('data-first-name');
+                const lastName = button.getAttribute('data-last-name');
+                const phone = button.getAttribute('data-phone');
+                const address = button.getAttribute('data-address');
+                const fraccionamiento = button.getAttribute('data-fraccionamiento');
+                const zona = button.getAttribute('data-zona');
+                const lat = button.getAttribute('data-lat');
+                const lng = button.getAttribute('data-lng');
+                const obs = button.getAttribute('data-obs');
+
+                document.getElementById('modal-customer-name').textContent = `${firstName} ${lastName}`.trim();
+                document.getElementById('modal-customer-phone-badge').innerHTML = `<i class="fas fa-phone-alt me-1"></i>${phone}`;
+                document.getElementById('modal-customer-address').textContent = address;
+                document.getElementById('modal-customer-fraccionamiento').textContent = fraccionamiento;
+                document.getElementById('modal-customer-zona').textContent = zona;
+                
+                const coordsDiv = document.getElementById('modal-coords-div');
+                if (lat && lng) {
+                    document.getElementById('modal-customer-coords').innerHTML = `<i class="fas fa-location-arrow text-primary me-1"></i>${lat}, ${lng} <a href="https://www.google.com/maps/search/?api=1&query=${lat},${lng}" target="_blank" class="btn btn-sm btn-link text-decoration-none p-0 ms-2"><i class="fas fa-external-link-alt"></i> Ver Mapa</a>`;
+                    coordsDiv.style.display = 'block';
+                } else {
+                    coordsDiv.style.display = 'none';
+                }
+                
+                document.getElementById('modal-customer-observaciones').textContent = obs;
+            });
         }
     });
 </script>

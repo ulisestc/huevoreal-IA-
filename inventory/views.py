@@ -70,7 +70,7 @@ class InventoryMovementCreateView(LoginRequiredMixin, CreateView):
             defaults={'quantity': 0}
         )
 
-        if movement.movement_type == 'PRODUCCION':
+        if movement.movement_type in ['PRODUCCION', 'COMPRA']:
             inventory.quantity += movement.quantity
         
         inventory.save()
