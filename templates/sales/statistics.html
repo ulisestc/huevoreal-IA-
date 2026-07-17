@@ -88,14 +88,10 @@
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
                         <h6 class="text-uppercase mb-1" style="font-size:0.75rem;">Vendidos ({{ view_date|date:"F" }})</h6>
-                        {% if own_sold_pieces_month > 0 or supplier_sold_pieces_month > 0 or own_sold_kg_month > 0 or supplier_sold_kg_month > 0 %}
+                        {% if own_sold_pieces_month > 0 or supplier_sold_pieces_month > 0 %}
                             <h4 class="mb-1" style="font-size: 1.25rem;">
                                 {% with total_pieces=own_sold_pieces_month|add:supplier_sold_pieces_month %}
-                                    {% if total_pieces > 0 %}{{ total_pieces }} pzas{% endif %}
-                                {% endwith %}
-                                {% if own_sold_pieces_month|add:supplier_sold_pieces_month > 0 and own_sold_kg_month|add:supplier_sold_kg_month > 0 %} · {% endif %}
-                                {% with total_kg=own_sold_kg_month|add:supplier_sold_kg_month %}
-                                    {% if total_kg > 0 %}{{ total_kg|floatformat:1 }} kg{% endif %}
+                                    {{ total_pieces|floatformat:0 }} pzas
                                 {% endwith %}
                             </h4>
                         {% else %}
@@ -103,16 +99,10 @@
                         {% endif %}
                         <div class="mt-2" style="font-size: 0.8rem; line-height: 1.2;">
                             <span class="opacity-75 d-block"><i class="fas fa-egg me-1"></i>Propia: 
-                                {% if own_sold_pieces_month > 0 %}{{ own_sold_pieces_month }} pzas{% endif %}
-                                {% if own_sold_pieces_month > 0 and own_sold_kg_month > 0 %} · {% endif %}
-                                {% if own_sold_kg_month > 0 %}{{ own_sold_kg_month|floatformat:1 }} kg{% endif %}
-                                {% if own_sold_pieces_month == 0 and own_sold_kg_month == 0 %}0 pzas{% endif %}
+                                {{ own_sold_pieces_month|floatformat:0 }} pzas
                             </span>
                             <span class="opacity-75 d-block"><i class="fas fa-truck me-1"></i>Prov. Extra: 
-                                {% if supplier_sold_pieces_month > 0 %}{{ supplier_sold_pieces_month }} pzas{% endif %}
-                                {% if supplier_sold_pieces_month > 0 and supplier_sold_kg_month > 0 %} · {% endif %}
-                                {% if supplier_sold_kg_month > 0 %}{{ supplier_sold_kg_month|floatformat:1 }} kg{% endif %}
-                                {% if supplier_sold_pieces_month == 0 and supplier_sold_kg_month == 0 %}0 pzas{% endif %}
+                                {{ supplier_sold_pieces_month|floatformat:0 }} pzas
                             </span>
                         </div>
                     </div>
@@ -214,7 +204,6 @@
                                 <th class="text-end">Utilidad</th>
                                 <th class="text-end">Prod. (pzas)</th>
                                 <th class="text-end">Vend. (pzas)</th>
-                                <th class="text-end">Vend. (kg)</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -226,13 +215,12 @@
                                     <td class="text-end text-muted" style="font-size:0.9rem;">${{ month_data.supplier_sales|floatformat:2 }}</td>
                                     <td class="text-end text-danger">-${{ month_data.total_expenses|floatformat:2 }}</td>
                                     <td class="text-end fw-bold {% if month_data.net_profit >= 0 %}text-primary{% else %}text-danger{% endif %}">${{ month_data.net_profit|floatformat:2 }}</td>
-                                    <td class="text-end">{% if month_data.eggs_produced %}{{ month_data.eggs_produced }}{% else %}—{% endif %}</td>
-                                    <td class="text-end">{% if month_data.eggs_sold_pieces %}{{ month_data.eggs_sold_pieces }}{% else %}—{% endif %}</td>
-                                    <td class="text-end">{% if month_data.eggs_sold_kg %}{{ month_data.eggs_sold_kg|floatformat:1 }}{% else %}—{% endif %}</td>
+                                    <td class="text-end">{% if month_data.eggs_produced %}{{ month_data.eggs_produced|floatformat:0 }}{% else %}—{% endif %}</td>
+                                    <td class="text-end">{% if month_data.eggs_sold_pieces %}{{ month_data.eggs_sold_pieces|floatformat:0 }}{% else %}—{% endif %}</td>
                                 </tr>
                             {% empty %}
                                 <tr>
-                                    <td colspan="9" class="text-center">No hay datos financieros disponibles.</td>
+                                    <td colspan="8" class="text-center">No hay datos financieros disponibles.</td>
                                 </tr>
                             {% endfor %}
                         </tbody>

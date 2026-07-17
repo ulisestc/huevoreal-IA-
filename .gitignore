@@ -2,6 +2,7 @@ db.sqlite3
 .env
 venv
 .env.save
+reporte_utilidades.pdf
 
 
 # Created by https://www.toptal.com/developers/gitignore/api/django

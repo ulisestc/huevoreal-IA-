@@ -313,21 +313,15 @@ class StatisticsView(LoginRequiredMixin, TemplateView):
             date__lte=month_end
         ).aggregate(Sum('quantity'))['quantity__sum'] or 0
 
-        # Total sales in pieces and kg
+        # Total sales in pieces
         total_sold_pieces_month = Sale.objects.filter(day__range=[month_start, month_end]).aggregate(Sum('quantity_piece'))['quantity_piece__sum'] or 0
-        total_sold_kg_month = Sale.objects.filter(day__range=[month_start, month_end]).aggregate(Sum('quantity_kg'))['quantity_kg__sum'] or Decimal('0.00')
 
         own_sold_pieces_month = Decimal(str(total_sold_pieces_month)) * own_ratio
         supplier_sold_pieces_month = Decimal(str(total_sold_pieces_month)) * supplier_ratio
 
-        own_sold_kg_month = total_sold_kg_month * own_ratio
-        supplier_sold_kg_month = total_sold_kg_month * supplier_ratio
-
-        context['eggs_produced_month'] = eggs_produced_month
-        context['own_sold_pieces_month'] = float(own_sold_pieces_month)
-        context['supplier_sold_pieces_month'] = float(supplier_sold_pieces_month)
-        context['own_sold_kg_month'] = own_sold_kg_month
-        context['supplier_sold_kg_month'] = supplier_sold_kg_month
+        context['eggs_produced_month'] = int(eggs_produced_month)
+        context['own_sold_pieces_month'] = int(round(own_sold_pieces_month))
+        context['supplier_sold_pieces_month'] = int(round(supplier_sold_pieces_month))
         context['trend_labels'] = json.dumps(trend_labels, cls=DjangoJSONEncoder)
         context['trend_data'] = json.dumps(trend_data, cls=DjangoJSONEncoder)
         context['payment_labels'] = json.dumps(payment_labels, cls=DjangoJSONEncoder)
@@ -405,8 +399,6 @@ class StatisticsView(LoginRequiredMixin, TemplateView):
             ).aggregate(Sum('quantity'))['quantity__sum'] or 0
             eggs_sold_p_m = Sale.objects.filter(day__range=[ms, me]).aggregate(
                 Sum('quantity_piece'))['quantity_piece__sum'] or 0
-            eggs_sold_k_m = Sale.objects.filter(day__range=[ms, me]).aggregate(
-                Sum('quantity_kg'))['quantity_kg__sum'] or Decimal('0.00')
 
             monthly_financial_data.append({
                 'month': am['label'],
@@ -415,9 +407,8 @@ class StatisticsView(LoginRequiredMixin, TemplateView):
                 'supplier_sales': s_m_supplier,
                 'total_expenses': e_m,
                 'net_profit': s_m - e_m,
-                'eggs_produced': eggs_prod_m,
-                'eggs_sold_pieces': eggs_sold_p_m or 0,
-                'eggs_sold_kg': eggs_sold_k_m,
+                'eggs_produced': int(eggs_prod_m),
+                'eggs_sold_pieces': int(eggs_sold_p_m or 0),
             })
 
             cat_exp = Expense.objects.filter(date__range=[ms, me]).values('category').annotate(total=Sum('amount'))
@@ -505,7 +496,7 @@ class InvestorDashboardView(LoginRequiredMixin, TemplateView):
                 'profit': p_total,
                 'profit_own': p_own,
                 'profit_supplier': p_supplier,
-                'eggs_produced': eggs_prod,
+                'eggs_produced': int(eggs_prod),
             })
 
         # Only use months with BOTH sales and expenses for KPI averages.
@@ -560,8 +551,8 @@ class InvestorDashboardView(LoginRequiredMixin, TemplateView):
             'profit_margin_pct': profit_margin_pct,
             'avg_monthly_growth': avg_monthly_growth,
             'total_customers': total_customers,
-            'total_eggs_produced': total_eggs_produced,
-            'total_eggs_sold_pieces': total_eggs_sold_pieces,
+            'total_eggs_produced': int(total_eggs_produced),
+            'total_eggs_sold_pieces': int(total_eggs_sold_pieces),
             'monthly_data': monthly_data,
             'monthly_data_json': json.dumps(monthly_data, cls=DjangoJSONEncoder),
             'avg_monthly_profit_float': float(avg_monthly_profit),
