@@ -39,11 +39,11 @@
 
             <div class="d-grid d-sm-block">
                 {% if request.GET.status == 'pending' %}
-                    <a href="{% url 'sale_list' %}{% if request.GET.q %}?q={{ request.GET.q }}{% endif %}" class="btn btn-secondary m-0">
+                    <a href="{% url 'sale_list' %}?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}{% if selected_seller %}seller={{ selected_seller }}{% endif %}" class="btn btn-secondary m-0">
                         <i class="fas fa-list"></i> Ver Todas
                     </a>
                 {% else %}
-                    <a href="{% url 'sale_list' %}?status=pending{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}" class="btn btn-warning text-dark m-0">
+                    <a href="{% url 'sale_list' %}?status=pending{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if selected_seller %}&seller={{ selected_seller }}{% endif %}" class="btn btn-warning text-dark m-0">
                         <i class="fas fa-exclamation-circle"></i> Ver Pendientes
                     </a>
                 {% endif %}
@@ -137,24 +137,38 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        const searchForm = document.querySelector('form[method="get"]');
         const searchInput = document.querySelector('input[name="q"]');
-        if (searchInput) {
+        const sellerSelect = document.querySelector('select[name="seller"]');
+
+        if (searchForm) {
             let timeout = null;
-            
-            function performSearch(query) {
-                const url = window.location.pathname + '?q=' + encodeURIComponent(query);
+
+            function performSearch() {
+                const formData = new FormData(searchForm);
+                const params = new URLSearchParams();
+
+                for (const [key, value] of formData.entries()) {
+                    if (value.trim() !== '') {
+                        params.append(key, value.trim());
+                    }
+                }
+
+                const queryString = params.toString();
+                const url = window.location.pathname + (queryString ? '?' + queryString : '');
+
                 fetch(url)
                     .then(res => res.text())
                     .then(html => {
                         const parser = new DOMParser();
                         const doc = parser.parseFromString(html, 'text/html');
-                        
+
                         const newTable = doc.querySelector('.table-responsive');
                         const currentTable = document.querySelector('.table-responsive');
                         if (newTable && currentTable) {
                             currentTable.innerHTML = newTable.innerHTML;
                         }
-                        
+
                         // Update pagination
                         const newNav = doc.querySelector('nav[aria-label="Page navigation"]');
                         const currentNav = document.querySelector('nav[aria-label="Page navigation"]');
@@ -166,27 +180,50 @@
                             }
                         } else if (newNav) {
                             const card = document.querySelector('.card.shadow-sm');
-                            card.insertAdjacentHTML('afterend', newNav.outerHTML);
+                            if (card) {
+                                card.insertAdjacentHTML('afterend', newNav.outerHTML);
+                            }
                         }
-                        
+
+                        // Update Clear Filter button
+                        const newClearBtnContainer = doc.querySelector('.d-flex.gap-2');
+                        const currentClearBtnContainer = document.querySelector('.d-flex.gap-2');
+                        if (newClearBtnContainer && currentClearBtnContainer) {
+                            currentClearBtnContainer.innerHTML = newClearBtnContainer.innerHTML;
+                        }
+
+                        // Update Ver Pendientes / Ver Todas button
+                        const newToggleBtn = doc.querySelector('.d-grid.d-sm-block');
+                        const currentToggleBtn = document.querySelector('.d-grid.d-sm-block');
+                        if (newToggleBtn && currentToggleBtn) {
+                            currentToggleBtn.innerHTML = newToggleBtn.innerHTML;
+                        }
+
                         window.history.replaceState(null, '', url);
                     });
             }
 
-            searchInput.addEventListener('input', function() {
-                clearTimeout(timeout);
-                timeout = setTimeout(() => {
-                    performSearch(searchInput.value);
-                }, 300);
-            });
-
-            if (searchInput.form) {
-                searchInput.form.addEventListener('submit', function(e) {
-                    e.preventDefault();
+            if (searchInput) {
+                searchInput.addEventListener('input', function() {
                     clearTimeout(timeout);
-                    performSearch(searchInput.value);
+                    timeout = setTimeout(() => {
+                        performSearch();
+                    }, 300);
                 });
             }
+
+            if (sellerSelect) {
+                sellerSelect.addEventListener('change', function() {
+                    clearTimeout(timeout);
+                    performSearch();
+                });
+            }
+
+            searchForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                clearTimeout(timeout);
+                performSearch();
+            });
         }
     });
 </script>

@@ -205,3 +205,49 @@ class SalesTestCase(TestCase):
         })
         self.assertEqual(response.status_code, 302)
 
+    def test_sale_list_seller_filter(self):
+        User = get_user_model()
+        user2 = User.objects.create_user(username='otheruser', password='password')
+        
+        sale1 = Sale.objects.create(
+            day=timezone.now().date(),
+            location=self.location,
+            product=self.product_piece,
+            customer=self.customer,
+            sale_type='PIEZA',
+            quantity_piece=10,
+            unit_price=1.50,
+            price=15.00,
+            amount_paid=15.00,
+            is_paid=True,
+            payment_date=timezone.now().date(),
+            payment_method='EFECTIVO',
+            seller=self.user
+        )
+        
+        sale2 = Sale.objects.create(
+            day=timezone.now().date(),
+            location=self.location,
+            product=self.product_piece,
+            customer=self.customer,
+            sale_type='PIEZA',
+            quantity_piece=5,
+            unit_price=1.50,
+            price=7.50,
+            amount_paid=7.50,
+            is_paid=True,
+            payment_date=timezone.now().date(),
+            payment_method='EFECTIVO',
+            seller=user2
+        )
+        
+        self.client.login(username='testuser', password='password')
+        
+        # Request with seller filter for user2
+        response = self.client.get(f'/sales/?seller={user2.pk}')
+        self.assertEqual(response.status_code, 200)
+        sales = list(response.context['sales'])
+        self.assertIn(sale2, sales)
+        self.assertNotIn(sale1, sales)
+
+
