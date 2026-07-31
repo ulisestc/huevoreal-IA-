@@ -13,6 +13,7 @@ class LocationListView(LoginRequiredMixin, ListView):
     model = Location
     template_name = 'inventory/location_list.html'
     context_object_name = 'locations'
+    ordering = ['name']
     paginate_by = 10
 
 class LocationCreateView(LoginRequiredMixin, CreateView):
