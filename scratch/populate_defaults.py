@@ -15,7 +15,7 @@ from sales.models import Sale, Order
 # 1. Create default supplier
 supplier, _ = Supplier.objects.get_or_create(
     name="Producción Propia",
-    defaults={'contact_name': "Tío Paul", 'is_active': True}
+    defaults={'contact_name': "Propietario", 'is_active': True}
 )
 print(f"Supplier: {supplier}")
 

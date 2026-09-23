@@ -1,171 +1,574 @@
+/* ==========================================================================
+   Airtable-Inspired Design System (Ref: DESIGN.md)
+   Clean, Editorial, High-Contrast Data Management Interface
+   ========================================================================== */
+
 :root {
-    --primary-color: #1e5128; /* Dark Green */
-    --secondary-color: #4e9f3d; /* Lighter Green */
-    --dark-color: #191f1c; /* Very Dark Green/Black */
-    --light-color: #d8e9d8; /* Pale Green */
-    --success-color: #198754;
-    --danger-color: #dc3545;
+    /* Brand & Surfaces */
+    --color-primary: #181d26;
+    --color-primary-active: #0d1218;
+    --color-ink: #181d26;
+    --color-body: #333840;
+    --color-muted: #64748b;
+    --color-hairline: #e2e8f0;
+    --color-border-strong: #9297a0;
+    --color-canvas: #ffffff;
+    --color-surface-soft: #f8fafc;
+    --color-surface-strong: #e0e2e6;
+    --color-surface-dark: #181d26;
+
+    /* Signature Accent Cards */
+    --color-signature-coral: #aa2d00;
+    --color-signature-forest: #0a2e0e;
+    --color-signature-cream: #f5e9d4;
+    --color-signature-peach: #fcab79;
+    --color-signature-mint: #a8d8c4;
+    --color-signature-yellow: #f4d35e;
+    --color-signature-mustard: #d9a441;
+
+    /* Semantic */
+    --color-link: #1b61c9;
+    --color-link-active: #1a3866;
+    --color-success: #0a2e0e;
+    --color-danger: #aa2d00;
+    --color-warning: #d9a441;
+
+    /* Border Radius Scale */
+    --radius-xs: 2px;
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --radius-lg: 12px;
+    --radius-pill: 9999px;
+
+    /* Bootstrap 5 Overrides */
+    --bs-body-bg: var(--color-canvas);
+    --bs-body-color: var(--color-body);
+    --bs-primary: var(--color-primary);
+    --bs-primary-rgb: 24, 29, 38;
+    --bs-secondary: var(--color-surface-soft);
+    --bs-secondary-rgb: 248, 250, 252;
+    --bs-border-color: var(--color-hairline);
+    --bs-border-radius: var(--radius-md);
+    --bs-border-radius-sm: var(--radius-sm);
+    --bs-border-radius-lg: var(--radius-lg);
+    --bs-font-sans-serif: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
+/* Base Document */
 body {
-    background-color: #f4f8f4; /* Very light green tint background */
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    color: #333;
-    font-size: 18px;
-    line-height: 1.6;
+    background-color: #fafafa;
+    color: var(--color-body);
+    font-family: var(--bs-font-sans-serif);
+    font-size: 15px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
 }
 
-/* Navbar */
+/* Typography */
+h1, h2, h3, h4, h5, h6 {
+    color: var(--color-ink);
+    font-weight: 500;
+    letter-spacing: -0.02em;
+}
+
+h2 {
+    font-size: 1.65rem;
+    margin-bottom: 1.25rem;
+}
+
+a {
+    color: var(--color-link);
+    text-decoration: none;
+    transition: color 0.15s ease;
+}
+
+a:hover {
+    color: var(--color-link-active);
+}
+
+/* Navigation (Top Nav) */
 .navbar {
-    background-color: var(--primary-color) !important;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    padding-top: 1rem;
-    padding-bottom: 1rem;
+    background-color: var(--color-canvas) !important;
+    border-bottom: 1px solid var(--color-hairline);
+    padding: 0.75rem 0;
     margin-bottom: 2rem;
+    box-shadow: none !important;
 }
 
 .navbar-brand {
-    font-size: 1.5rem;
-    font-weight: 700;
+    color: var(--color-ink) !important;
+    font-size: 1.2rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.navbar-brand i {
+    color: var(--color-signature-yellow);
+    filter: drop-shadow(0 1px 1px rgba(0,0,0,0.1));
 }
 
 .nav-link {
-    font-size: 1.2rem;
-    padding: 10px 15px !important;
+    color: var(--color-muted) !important;
+    font-size: 14px;
+    font-weight: 500;
+    padding: 8px 14px !important;
+    border-radius: var(--radius-sm);
+    transition: all 0.15s ease;
+}
+
+.nav-link:hover, .nav-link.active {
+    color: var(--color-ink) !important;
+    background-color: var(--color-surface-soft);
+}
+
+.navbar-nav .dropdown-menu {
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--radius-md);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+    padding: 6px;
+    font-size: 14px;
+}
+
+.dropdown-item {
+    border-radius: var(--radius-sm);
+    padding: 8px 12px;
+    color: var(--color-body);
+}
+
+.dropdown-item:hover {
+    background-color: var(--color-surface-soft);
+    color: var(--color-ink);
 }
 
 /* Buttons */
 .btn {
-    padding: 10px 20px;
-    font-size: 1.1rem;
-    border-radius: 8px;
-    margin-right: 5px;
-    margin-bottom: 5px;
+    font-size: 14px;
+    font-weight: 500;
+    padding: 9px 18px;
+    border-radius: var(--radius-lg);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.15s ease;
+    box-shadow: none !important;
 }
 
 .btn-primary {
-    background-color: var(--primary-color);
-    border-color: var(--primary-color);
+    background-color: var(--color-primary);
+    border-color: var(--color-primary);
+    color: #ffffff;
 }
 
-.btn-primary:hover {
-    background-color: #14361b;
-    border-color: #14361b;
+.btn-primary:hover, .btn-primary:focus {
+    background-color: var(--color-primary-active);
+    border-color: var(--color-primary-active);
+    color: #ffffff;
 }
 
-.btn-secondary {
-    background-color: #6c757d;
-    border-color: #6c757d;
+.btn-secondary, .btn-outline-secondary {
+    background-color: var(--color-canvas);
+    border: 1px solid var(--color-hairline);
+    color: var(--color-ink);
 }
 
-.btn-lg {
-    padding: 12px 24px;
-    font-size: 1.25rem;
+.btn-secondary:hover, .btn-outline-secondary:hover {
+    background-color: var(--color-surface-soft);
+    border-color: var(--color-border-strong);
+    color: var(--color-ink);
 }
 
-.d-grid .btn {
-    margin-right: 0;
+.btn-outline-primary {
+    background-color: var(--color-canvas);
+    border: 1px solid var(--color-hairline);
+    color: var(--color-ink);
 }
 
-/* Cards */
+.btn-outline-primary:hover {
+    background-color: var(--color-surface-soft);
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+}
+
+.btn-success {
+    background-color: var(--color-signature-forest);
+    border-color: var(--color-signature-forest);
+    color: #ffffff;
+}
+
+.btn-success:hover {
+    background-color: #061c09;
+    border-color: #061c09;
+    color: #ffffff;
+}
+
+.btn-danger, .btn-outline-danger {
+    background-color: #ffffff;
+    border: 1px solid #fecaca;
+    color: var(--color-signature-coral);
+}
+
+.btn-danger:hover, .btn-outline-danger:hover {
+    background-color: #fef2f2;
+    border-color: var(--color-signature-coral);
+    color: var(--color-signature-coral);
+}
+
+.btn-sm {
+    padding: 6px 12px;
+    font-size: 13px;
+    border-radius: var(--radius-sm);
+}
+
+/* Cards & Containers */
 .card {
-    border: none;
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-    margin-bottom: 2rem;
+    background-color: var(--color-canvas);
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--radius-lg);
+    box-shadow: none !important;
+    margin-bottom: 1.5rem;
 }
 
 .card-header {
-    background-color: var(--primary-color); /* Changed from secondary to primary for better contrast */
-    color: #fff;
-    padding: 1.25rem;
-    font-size: 1.25rem;
-    font-weight: 600;
-    border-top-left-radius: 12px !important;
-    border-top-right-radius: 12px !important;
+    background-color: var(--color-surface-soft) !important;
+    color: var(--color-ink) !important;
+    border-bottom: 1px solid var(--color-hairline) !important;
+    padding: 1rem 1.25rem;
+    font-weight: 500;
+    font-size: 15px;
+    border-top-left-radius: var(--radius-lg) !important;
+    border-top-right-radius: var(--radius-lg) !important;
 }
 
 .card-body {
     padding: 1.5rem;
 }
 
-/* Forms */
+/* Overriding Bootstrap Background Classes on Cards to preserve Airtable design */
+.card.bg-success, .card.bg-primary, .card.bg-danger, .card.bg-info, .card.bg-dark {
+    background-color: var(--color-canvas) !important;
+    color: var(--color-body) !important;
+    border: 1px solid var(--color-hairline) !important;
+}
+
+.card.bg-success .card-body, .card.bg-primary .card-body, .card.bg-danger .card-body, .card.bg-info .card-body, .card.bg-dark .card-body {
+    color: var(--color-body) !important;
+}
+
+.card.bg-success h3, .card.bg-primary h3, .card.bg-danger h3, .card.bg-info h3, .card.bg-dark h3 {
+    color: var(--color-ink) !important;
+}
+
+/* Signature Cards */
+.signature-card-forest {
+    background-color: var(--color-signature-forest);
+    color: #ffffff;
+    border: none;
+}
+
+.signature-card-coral {
+    background-color: var(--color-signature-coral);
+    color: #ffffff;
+    border: none;
+}
+
+.signature-card-cream {
+    background-color: var(--color-signature-cream);
+    color: var(--color-ink);
+    border: 1px solid #eddcc1;
+}
+
+.signature-card-soft {
+    background-color: var(--color-surface-soft);
+    color: var(--color-ink);
+    border: 1px solid var(--color-hairline);
+}
+
+/* Forms & Inputs */
 .form-label {
-    font-weight: 600;
-    margin-bottom: 0.5rem;
-    color: var(--dark-color);
+    color: var(--color-ink);
+    font-size: 13px;
+    font-weight: 500;
+    margin-bottom: 6px;
 }
 
-.form-control, .form-select {
-    padding: 0.75rem 1rem;
-    font-size: 1.1rem;
-    border-radius: 8px;
-    border: 1px solid #ced4da;
-    margin-bottom: 1rem;
+.form-control, .form-select, input[type="text"], input[type="password"], input[type="email"], input[type="number"], input[type="date"], select, textarea {
+    background-color: var(--color-canvas);
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--radius-sm);
+    color: var(--color-ink);
+    font-size: 14px;
+    padding: 9px 12px;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
-.form-control:focus, .form-select:focus {
-    border-color: var(--secondary-color);
-    box-shadow: 0 0 0 0.25rem rgba(78, 159, 61, 0.25);
+.form-control:not(textarea), .form-select {
+    height: 44px;
 }
 
-.input-group {
-    margin-bottom: 1rem;
+.form-control:focus, .form-select:focus, input:focus, select:focus, textarea:focus {
+    border-color: var(--color-primary) !important;
+    box-shadow: 0 0 0 1px var(--color-primary) !important;
+    background-color: #ffffff;
+    outline: none;
 }
 
-.input-group .form-control {
-    margin-bottom: 0;
+.input-group .form-control, .input-group .form-select {
+    height: 44px;
 }
 
-/* Tables - Mobile Optimization */
+.errorlist {
+    color: var(--color-signature-coral);
+    list-style: none;
+    padding-left: 0;
+    font-size: 13px;
+    margin-top: 4px;
+    margin-bottom: 8px;
+}
+
+/* Tables (Airtable-style Clean Rows) */
 .table-responsive {
-    border-radius: 12px;
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--radius-lg);
+    background-color: var(--color-canvas);
     overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    margin-bottom: 1rem;
-    border: 1px solid #eee;
 }
 
-.table th, .table td {
-    padding: 1rem;
-    vertical-align: middle;
+.table {
+    margin-bottom: 0;
+    color: var(--color-body);
+    border-color: var(--color-hairline);
+}
+
+.table thead th, .table th {
+    background-color: var(--color-surface-soft) !important;
+    color: var(--color-muted) !important;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--color-hairline) !important;
     white-space: nowrap;
 }
 
-.table thead th {
-    background-color: var(--dark-color);
-    color: white;
-    font-weight: 600;
+.table tbody td {
+    padding: 14px 16px;
+    vertical-align: middle;
+    border-bottom: 1px solid #f1f5f9;
+    font-size: 14px;
+    white-space: nowrap;
 }
 
-/* Typography */
-h2 {
-    font-size: 2rem;
-    font-weight: 700;
-    color: var(--primary-color);
-    margin-bottom: 1.5rem;
+.table tbody tr:hover, .clickable-row:hover td {
+    background-color: var(--color-surface-soft) !important;
 }
 
-/* Mobile */
+.table-striped tbody tr:nth-of-type(odd) {
+    background-color: #ffffff;
+}
+
+/* Badges (Pills) */
+.badge {
+    padding: 5px 10px;
+    font-size: 12px;
+    font-weight: 500;
+    border-radius: var(--radius-pill);
+    letter-spacing: 0.01em;
+}
+
+.badge.bg-success {
+    background-color: #ecfdf5 !important;
+    color: #065f46 !important;
+    border: 1px solid #a7f3d0;
+}
+
+.badge.bg-warning {
+    background-color: #fffbeb !important;
+    color: #92400e !important;
+    border: 1px solid #fde68a;
+}
+
+.badge.bg-danger {
+    background-color: #fef2f2 !important;
+    color: #991b1b !important;
+    border: 1px solid #fecaca;
+}
+
+.badge.bg-info {
+    background-color: #eff6ff !important;
+    color: #1e40af !important;
+    border: 1px solid #bfdbfe;
+}
+
+.badge.bg-secondary, .badge.bg-light {
+    background-color: #f1f5f9 !important;
+    color: #475569 !important;
+    border: 1px solid #e2e8f0;
+}
+
+/* List Groups */
+.list-group {
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+}
+
+.list-group-item {
+    border-color: var(--color-hairline);
+    padding: 14px 18px;
+    font-size: 14px;
+    color: var(--color-body);
+}
+
+.list-group-item:hover {
+    background-color: var(--color-surface-soft);
+}
+
+/* Alerts */
+.alert {
+    border-radius: var(--radius-md);
+    font-size: 14px;
+    padding: 12px 16px;
+    border: 1px solid transparent;
+}
+
+.alert-success {
+    background-color: #ecfdf5;
+    border-color: #a7f3d0;
+    color: #065f46;
+}
+
+.alert-danger {
+    background-color: #fef2f2;
+    border-color: #fecaca;
+    color: #991b1b;
+}
+
+.alert-warning {
+    background-color: #fffbeb;
+    border-color: #fde68a;
+    color: #92400e;
+}
+
+.alert-info {
+    background-color: #eff6ff;
+    border-color: #bfdbfe;
+    color: #1e40af;
+}
+
+/* Modal Windows */
+.modal-content {
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+.modal-header {
+    background-color: var(--color-surface-soft) !important;
+    border-bottom: 1px solid var(--color-hairline);
+    padding: 1rem 1.25rem;
+    font-weight: 500;
+}
+
+.modal-footer {
+    border-top: 1px solid var(--color-hairline);
+    padding: 1rem 1.25rem;
+}
+
+/* Pagination */
+.pagination {
+    gap: 4px;
+}
+
+.page-link {
+    color: var(--color-ink);
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--radius-sm) !important;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 6px 14px;
+}
+
+.page-link:hover {
+    background-color: var(--color-surface-soft);
+    border-color: var(--color-border-strong);
+    color: var(--color-ink);
+}
+
+.page-item.active .page-link {
+    background-color: var(--color-primary);
+    border-color: var(--color-primary);
+    color: #ffffff;
+}
+
+/* KPI Card Typography */
+.card .card-body h3 {
+    font-size: 1.75rem;
+    font-weight: 500;
+    letter-spacing: -0.02em;
+    color: var(--color-ink);
+}
+
+/* Charts */
+canvas {
+    max-height: 340px;
+}
+
+/* Range Sliders */
+.form-range::-webkit-slider-thumb {
+    background: var(--color-primary);
+}
+
+.form-range::-moz-range-thumb {
+    background: var(--color-primary);
+}
+
+/* Custom Table Scrollbar */
+.table-responsive::-webkit-scrollbar {
+    height: 6px;
+}
+
+.table-responsive::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
+}
+
+.table-responsive::-webkit-scrollbar-track {
+    background: #f8fafc;
+}
+
+/* Mobile Adjustments */
 @media (max-width: 768px) {
-    .container {
+    body {
+        font-size: 14px;
+    }
+
+    .container, .container-fluid {
         padding-left: 1rem;
         padding-right: 1rem;
     }
 
     h2 {
-        font-size: 1.75rem;
-        text-align: center;
+        font-size: 1.4rem;
     }
-    
-    .btn {
+
+    .btn:not(.btn-sm) {
         width: 100%;
-        margin-right: 0;
+        margin-bottom: 0.5rem;
     }
-    
-    /* Ensure table text is readable without being too huge on mobile */
-    .table th, .table td {
-        padding: 0.75rem;
-        font-size: 1rem;
+
+    .card-body {
+        padding: 1.25rem;
+    }
+
+    .table thead th, .table tbody td {
+        padding: 10px 12px;
+    }
+
+    .nav-link {
+        padding: 10px 12px !important;
     }
 }

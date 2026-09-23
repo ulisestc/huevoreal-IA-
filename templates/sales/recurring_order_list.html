@@ -1,11 +1,17 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-2 mb-3">
-    <h2 class="mb-md-0"><i class="fas fa-redo"></i> Gestión de Suscripciones</h2>
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-2 mb-4">
+    <div>
+        <div class="text-uppercase tracking-wider text-muted fw-bold small mb-1" style="font-size: 0.72rem; letter-spacing: 0.08em;">Reparto & Clientes Frecuentes</div>
+        <div class="d-flex align-items-center gap-2">
+            <h2 class="mb-0 fw-bold text-dark fs-3">Gestión de Suscripciones</h2>
+            <span class="badge bg-light text-dark border">{{ recurring_orders|length }} activas</span>
+        </div>
+    </div>
     <div class="d-flex gap-2">
-        <a href="{% url 'recurring_order_generate_list' %}" class="btn btn-success m-0"><i class="fas fa-magic"></i> Generar Pedidos</a>
-        <a href="{% url 'recurring_order_create' %}" class="btn btn-primary m-0"><i class="fas fa-plus"></i> Nueva Suscripción</a>
+        <a href="{% url 'recurring_order_generate_list' %}" class="btn btn-secondary"><i class="fas fa-magic me-1"></i> Generar Pedidos</a>
+        <a href="{% url 'recurring_order_create' %}" class="btn btn-primary"><i class="fas fa-plus me-1"></i> Nueva Suscripción</a>
     </div>
 </div>
 
@@ -18,16 +24,19 @@
     {% endfor %}
 {% endif %}
 
-<div class="card shadow-sm mb-4">
-    <div class="card-body">
+<div class="card mb-4">
+    <div class="card-body p-3">
         <form method="get" class="d-flex flex-column flex-sm-row gap-2">
             <div class="flex-grow-1">
-                <input type="text" name="q" class="form-control mb-0" placeholder="Buscar por cliente o producto..." value="{{ request.GET.q|default:'' }}">
+                <div class="input-group">
+                    <span class="input-group-text bg-transparent border-end-0 text-muted"><i class="fas fa-search"></i></span>
+                    <input type="text" name="q" class="form-control border-start-0 ps-0 mb-0" placeholder="Buscar por cliente o producto..." value="{{ request.GET.q|default:'' }}">
+                </div>
             </div>
             <div class="d-flex gap-2">
-                <button type="submit" class="btn btn-outline-secondary flex-grow-1 m-0"><i class="fas fa-search"></i> Buscar</button>
+                <button type="submit" class="btn btn-secondary"><i class="fas fa-search me-1"></i> Buscar</button>
                 {% if request.GET.q %}
-                    <a href="{% url 'recurring_order_list' %}" class="btn btn-outline-danger m-0"><i class="fas fa-times"></i></a>
+                    <a href="{% url 'recurring_order_list' %}" class="btn btn-outline-danger"><i class="fas fa-times"></i></a>
                 {% endif %}
             </div>
         </form>
@@ -87,8 +96,8 @@
                                 {% endif %}
                             </td>
                             <td class="text-end">
-                                <a href="{% url 'recurring_order_update' ro.id %}" class="btn btn-sm btn-outline-primary me-1"><i class="fas fa-edit"></i></a>
-                                <a href="{% url 'recurring_order_delete' ro.id %}" class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i></a>
+                                <a href="{% url 'recurring_order_update' ro.id %}" class="btn btn-sm btn-secondary me-1" title="Editar"><i class="fas fa-edit"></i></a>
+                                <a href="{% url 'recurring_order_delete' ro.id %}" class="btn btn-sm btn-outline-danger" title="Eliminar"><i class="fas fa-trash"></i></a>
                             </td>
                         </tr>
                     {% empty %}

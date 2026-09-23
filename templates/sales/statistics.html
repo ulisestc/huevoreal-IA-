@@ -1,124 +1,138 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="mb-4 d-flex flex-column flex-md-row justify-content-between align-items-center">
-    <h2 class="text-center text-md-start mb-3 mb-md-0">Estadísticas de {{ view_date|date:"F Y" }}</h2>
-    <form method="get" class="d-flex align-items-center">
-        <label for="month" class="me-2 fw-bold text-nowrap">Ver otro mes:</label>
-        <select name="month" id="month" class="form-select me-2" onchange="this.form.submit()">
+<!-- Editorial Header -->
+<div class="mb-4 d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 pb-3 border-bottom">
+    <div>
+        <h2 class="mb-1 fw-medium">Estadísticas Financieras</h2>
+        <p class="text-muted mb-0 small">Desempeño operativo, ingresos, egresos y producción • {{ view_date|date:"F Y" }}</p>
+    </div>
+    <form method="get" class="d-flex align-items-center gap-2">
+        <label for="month" class="small text-muted text-nowrap fw-medium mb-0">Periodo:</label>
+        <select name="month" id="month" class="form-select form-select-sm" onchange="this.form.submit()">
             {% for month in available_months %}
                 <option value="{{ month.value }}" {% if month.value == view_date|date:"Y-m" %}selected{% endif %}>
                     {{ month.label }}
                 </option>
             {% endfor %}
         </select>
-        <noscript><button type="submit" class="btn btn-primary">Ver</button></noscript>
+        <noscript><button type="submit" class="btn btn-primary btn-sm">Ver</button></noscript>
     </form>
 </div>
 
-<!-- Financial Summary -->
-<div class="row mb-3 g-3">
+<!-- Primary Financial KPIs (Airtable Style) -->
+<div class="row mb-4 g-3">
+    <!-- Ventas -->
     <div class="col-6 col-md-4">
-        <div class="card bg-success text-white shadow h-100">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <h6 class="text-uppercase mb-1" style="font-size:0.75rem;">Ventas ({{ view_date|date:"F" }})</h6>
-                        <h3 class="mb-0">${{ total_sales_month|floatformat:2 }}</h3>
-                        <div class="mt-2" style="font-size: 0.8rem; line-height: 1.2;">
-                            <span class="opacity-75 d-block"><i class="fas fa-egg me-1"></i>Propia: ${{ own_sales_month|floatformat:2 }}</span>
-                            <span class="opacity-75 d-block"><i class="fas fa-truck me-1"></i>Prov. Extra: ${{ supplier_sales_month|floatformat:2 }}</span>
-                        </div>
+        <div class="card h-100">
+            <div class="card-body d-flex flex-column justify-content-between">
+                <div>
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="text-muted small text-uppercase fw-semibold" style="letter-spacing: 0.05em;">Ventas ({{ view_date|date:"F" }})</span>
+                        <span class="badge bg-success"><i class="fas fa-arrow-up me-1"></i> Ingreso</span>
                     </div>
-                    <i class="fas fa-money-bill-wave fa-2x opacity-50"></i>
+                    <h3 class="mb-0 fw-medium">${{ total_sales_month|floatformat:2 }}</h3>
+                </div>
+                <div class="mt-3 pt-2 border-top small text-muted">
+                    <span><i class="fas fa-egg me-1"></i>Propia: <strong>${{ own_sales_month|floatformat:2 }}</strong></span><br>
+                    <span><i class="fas fa-truck me-1"></i>Prov. Extra: <strong>${{ supplier_sales_month|floatformat:2 }}</strong></span>
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- Gastos -->
     <div class="col-6 col-md-4">
-        <div class="card bg-danger text-white shadow h-100">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <h6 class="text-uppercase mb-1" style="font-size:0.75rem;">Gastos ({{ view_date|date:"F" }})</h6>
-                        <h3 class="mb-0">-${{ total_expenses_month|floatformat:2 }}</h3>
+        <div class="card h-100 border-start border-4" style="border-left-color: var(--color-signature-coral) !important;">
+            <div class="card-body d-flex flex-column justify-content-between">
+                <div>
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="text-muted small text-uppercase fw-semibold" style="letter-spacing: 0.05em;">Gastos ({{ view_date|date:"F" }})</span>
+                        <span class="badge bg-danger"><i class="fas fa-arrow-down me-1"></i> Egreso</span>
                     </div>
-                    <i class="fas fa-file-invoice-dollar fa-2x opacity-50"></i>
+                    <h3 class="mb-0 fw-medium" style="color: var(--color-signature-coral);">-${{ total_expenses_month|floatformat:2 }}</h3>
+                </div>
+                <div class="mt-3 pt-2 border-top small text-muted">
+                    <span>Compra huevo prov: <strong>${{ supplier_cost_month|floatformat:2 }}</strong></span>
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- Utilidad Neta -->
     <div class="col-12 col-md-4">
-        <div class="card {% if net_profit_month >= 0 %}bg-primary{% else %}bg-secondary{% endif %} text-white shadow h-100">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <h6 class="text-uppercase mb-1" style="font-size:0.75rem;">Utilidad Neta ({{ view_date|date:"F" }})</h6>
-                        <h3 class="mb-0">${{ net_profit_month|floatformat:2 }}</h3>
+        <div class="card h-100">
+            <div class="card-body d-flex flex-column justify-content-between">
+                <div>
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="text-muted small text-uppercase fw-semibold" style="letter-spacing: 0.05em;">Utilidad Neta ({{ view_date|date:"F" }})</span>
+                        <span class="badge {% if net_profit_month >= 0 %}bg-success{% else %}bg-danger{% endif %}">
+                            <i class="fas fa-chart-line me-1"></i> Margen
+                        </span>
                     </div>
-                    <i class="fas fa-chart-line fa-2x opacity-50"></i>
+                    <h3 class="mb-0 fw-medium {% if net_profit_month >= 0 %}text-success{% else %}text-danger{% endif %}">
+                        ${{ net_profit_month|floatformat:2 }}
+                    </h3>
+                </div>
+                <div class="mt-3 pt-2 border-top small text-muted">
+                    <span>Balance final del mes</span>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Egg Production & Sales Summary -->
+<!-- Egg Production & Sales KPI Row -->
 <div class="row mb-4 g-3">
     <div class="col-6">
-        <div class="card text-white shadow h-100" style="background: linear-gradient(135deg, #1a6b3a, #2e8b57);">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <h6 class="text-uppercase mb-1" style="font-size:0.75rem;">Producción ({{ view_date|date:"F" }})</h6>
+        <div class="card h-100">
+            <div class="card-body d-flex justify-content-between align-items-center">
+                <div>
+                    <span class="text-muted small text-uppercase fw-semibold" style="letter-spacing: 0.05em;">Producción de Huevo</span>
+                    <h3 class="mb-0 mt-1 fw-medium">
                         {% if eggs_produced_month > 0 %}
-                            <h3 class="mb-0">{{ eggs_produced_month }} pzas</h3>
+                            {{ eggs_produced_month }} <small class="fs-6 text-muted fw-normal">piezas</small>
                         {% else %}
-                            <h3 class="mb-0 opacity-75">Sin registro</h3>
+                            <span class="text-muted fs-5">Sin registro</span>
                         {% endif %}
-                    </div>
-                    <i class="fas fa-egg fa-2x opacity-50"></i>
+                    </h3>
+                </div>
+                <div class="p-3 rounded-circle" style="background-color: var(--color-surface-soft);">
+                    <i class="fas fa-egg fa-2x" style="color: var(--color-signature-yellow);"></i>
                 </div>
             </div>
         </div>
     </div>
     <div class="col-6">
-        <div class="card text-white shadow h-100" style="background: linear-gradient(135deg, #b45309, #d97706);">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <h6 class="text-uppercase mb-1" style="font-size:0.75rem;">Vendidos ({{ view_date|date:"F" }})</h6>
+        <div class="card h-100">
+            <div class="card-body d-flex justify-content-between align-items-center">
+                <div>
+                    <span class="text-muted small text-uppercase fw-semibold" style="letter-spacing: 0.05em;">Huevos Vendidos</span>
+                    <h3 class="mb-0 mt-1 fw-medium">
                         {% if own_sold_pieces_month > 0 or supplier_sold_pieces_month > 0 %}
-                            <h4 class="mb-1" style="font-size: 1.25rem;">
-                                {% with total_pieces=own_sold_pieces_month|add:supplier_sold_pieces_month %}
-                                    {{ total_pieces|floatformat:0 }} pzas
-                                {% endwith %}
-                            </h4>
+                            {% with total_pieces=own_sold_pieces_month|add:supplier_sold_pieces_month %}
+                                {{ total_pieces|floatformat:0 }} <small class="fs-6 text-muted fw-normal">piezas</small>
+                            {% endwith %}
                         {% else %}
-                            <h3 class="mb-0 opacity-75">Sin registro</h3>
+                            <span class="text-muted fs-5">Sin registro</span>
                         {% endif %}
-                        <div class="mt-2" style="font-size: 0.8rem; line-height: 1.2;">
-                            <span class="opacity-75 d-block"><i class="fas fa-egg me-1"></i>Propia: 
-                                {{ own_sold_pieces_month|floatformat:0 }} pzas
-                            </span>
-                            <span class="opacity-75 d-block"><i class="fas fa-truck me-1"></i>Prov. Extra: 
-                                {{ supplier_sold_pieces_month|floatformat:0 }} pzas
-                            </span>
-                        </div>
-                    </div>
-                    <i class="fas fa-shopping-basket fa-2x opacity-50"></i>
+                    </h3>
+                </div>
+                <div class="p-3 rounded-circle" style="background-color: var(--color-surface-soft);">
+                    <i class="fas fa-shopping-basket fa-2x text-muted"></i>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<div class="row">
-    <!-- Ventas Diarias -->
-    <div class="col-lg-8 mb-4">
-        <div class="card shadow">
-            <div class="card-header bg-primary text-white">
-                <h5 class="mb-0"><i class="fas fa-chart-line"></i> Tendencia de Ventas - {{ view_date|date:"F Y" }}</h5>
+<!-- Charts Section 1 -->
+<div class="row g-4 mb-4">
+    <!-- Tendencia de Ventas Diarias -->
+    <div class="col-lg-8">
+        <div class="card h-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span><i class="fas fa-chart-line text-muted me-2"></i>Tendencia Diaria de Ventas — {{ view_date|date:"F Y" }}</span>
             </div>
             <div class="card-body">
                 <canvas id="salesTrendChart"></canvas>
@@ -127,24 +141,27 @@
     </div>
 
     <!-- Metodos de Pago -->
-    <div class="col-lg-4 mb-4">
-        <div class="card shadow">
-            <div class="card-header bg-success text-white">
-                <h5 class="mb-0"><i class="fas fa-wallet"></i> Métodos de Pago</h5>
+    <div class="col-lg-4">
+        <div class="card h-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span><i class="fas fa-wallet text-muted me-2"></i>Métodos de Pago</span>
             </div>
-            <div class="card-body">
-                <canvas id="paymentMethodChart"></canvas>
+            <div class="card-body d-flex align-items-center justify-content-center">
+                <div style="width: 100%; max-width: 280px;">
+                    <canvas id="paymentMethodChart"></canvas>
+                </div>
             </div>
         </div>
     </div>
 </div>
 
-<div class="row">
+<!-- Charts Section 2 -->
+<div class="row g-4 mb-4">
     <!-- Top Clientes -->
-    <div class="col-lg-6 mb-4">
-        <div class="card shadow">
-            <div class="card-header bg-info text-white">
-                <h5 class="mb-0"><i class="fas fa-users"></i> Top 5 Clientes - {{ view_date|date:"F" }}</h5>
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span><i class="fas fa-users text-muted me-2"></i>Top 5 Clientes — {{ view_date|date:"F" }}</span>
             </div>
             <div class="card-body">
                 <canvas id="customerChart"></canvas>
@@ -152,99 +169,19 @@
         </div>
     </div>
 
-    <!-- Ventas por Vendedor (Tabla) -->
-    <div class="col-lg-6 mb-4">
-        <div class="card shadow">
-            <div class="card-header bg-warning text-dark">
-                <h5 class="mb-0"><i class="fas fa-user-tie"></i> Ventas por Vendedor - {{ view_date|date:"F" }}</h5>
+    <!-- Gastos por Categoría -->
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span><i class="fas fa-chart-pie text-muted me-2"></i>Gastos por Categoría</span>
+                <select id="expenseMonthSelector" class="form-select form-select-sm w-auto">
+                    {% for month_data in monthly_financial_data %}
+                        <option value="{{ month_data.month }}" {% if month_data.month == view_date|date:"F Y" %}selected{% endif %}>{{ month_data.month }}</option>
+                    {% endfor %}
+                </select>
             </div>
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-striped mb-0">
-                        <thead>
-                            <tr>
-                                <th>Vendedor</th>
-                                <th class="text-end">Total</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for entry in seller_sales %}
-                                <tr>
-                                    <td>{{ entry.seller__username }}</td>
-                                    <td class="text-end">${{ entry.total|floatformat:2 }}</td>
-                                </tr>
-                            {% empty %}
-                                <tr>
-                                    <td colspan="2" class="text-center">No hay datos disponibles.</td>
-                                </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Reporte Financiero Mensual -->
-    <div class="col-lg-6 mb-4">
-        <div class="card shadow h-100">
-            <div class="card-header bg-info text-white">
-                <h5 class="mb-0"><i class="fas fa-chart-pie"></i> Historial Financiero (Últimos 12 meses)</h5>
-            </div>
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-striped mb-0">
-                        <thead>
-                            <tr>
-                                <th>Mes</th>
-                                <th class="text-end">Ventas Totales</th>
-                                <th class="text-end">Venta Propia</th>
-                                <th class="text-end">Venta Prov.</th>
-                                <th class="text-end">Gastos</th>
-                                <th class="text-end">Utilidad</th>
-                                <th class="text-end">Prod. (pzas)</th>
-                                <th class="text-end">Vend. (pzas)</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for month_data in monthly_financial_data %}
-                                <tr>
-                                    <td>{{ month_data.month }}</td>
-                                    <td class="text-end text-success">${{ month_data.total_sales|floatformat:2 }}</td>
-                                    <td class="text-end text-muted" style="font-size:0.9rem;">${{ month_data.own_sales|floatformat:2 }}</td>
-                                    <td class="text-end text-muted" style="font-size:0.9rem;">${{ month_data.supplier_sales|floatformat:2 }}</td>
-                                    <td class="text-end text-danger">-${{ month_data.total_expenses|floatformat:2 }}</td>
-                                    <td class="text-end fw-bold {% if month_data.net_profit >= 0 %}text-primary{% else %}text-danger{% endif %}">${{ month_data.net_profit|floatformat:2 }}</td>
-                                    <td class="text-end">{% if month_data.eggs_produced %}{{ month_data.eggs_produced|floatformat:0 }}{% else %}—{% endif %}</td>
-                                    <td class="text-end">{% if month_data.eggs_sold_pieces %}{{ month_data.eggs_sold_pieces|floatformat:0 }}{% else %}—{% endif %}</td>
-                                </tr>
-                            {% empty %}
-                                <tr>
-                                    <td colspan="8" class="text-center">No hay datos financieros disponibles.</td>
-                                </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Gastos por Categoría Mensual -->
-    <div class="col-lg-6 mb-4">
-        <div class="card shadow h-100">
-            <div class="card-header bg-danger text-white">
-                <h5 class="mb-0"><i class="fas fa-chart-bar"></i> Gastos por Categoría</h5>
-            </div>
-            <div class="card-body">
-                <div class="mb-3">
-                    <select id="expenseMonthSelector" class="form-select form-select-sm">
-                        {% for month_data in monthly_financial_data %}
-                            <option value="{{ month_data.month }}" {% if month_data.month == view_date|date:"F Y" %}selected{% endif %}>{{ month_data.month }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div style="min-height: 350px; position: relative; margin: auto;">
+            <div class="card-body d-flex align-items-center justify-content-center">
+                <div style="width: 100%; max-width: 320px;">
                     <canvas id="expenseCategoryChart"></canvas>
                 </div>
             </div>
@@ -252,16 +189,63 @@
     </div>
 </div>
 
+<!-- Historical Financial Table (Airtable Clean Style) -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span><i class="fas fa-table text-muted me-2"></i>Historial Financiero (Últimos 12 meses)</span>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0 align-middle">
+                        <thead>
+                            <tr>
+                                <th>Mes</th>
+                                <th class="text-end">Ventas Totales</th>
+                                <th class="text-end">Venta Propia</th>
+                                <th class="text-end">Venta Prov.</th>
+                                <th class="text-end">Gastos</th>
+                                <th class="text-end">Utilidad Neta</th>
+                                <th class="text-end">Prod. (pzas)</th>
+                                <th class="text-end">Vend. (pzas)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for month_data in monthly_financial_data %}
+                                <tr>
+                                    <td class="fw-medium">{{ month_data.month }}</td>
+                                    <td class="text-end fw-semibold text-success">${{ month_data.total_sales|floatformat:2 }}</td>
+                                    <td class="text-end text-muted small">${{ month_data.own_sales|floatformat:2 }}</td>
+                                    <td class="text-end text-muted small">${{ month_data.supplier_sales|floatformat:2 }}</td>
+                                    <td class="text-end" style="color: var(--color-signature-coral); font-weight: 500;">-${{ month_data.total_expenses|floatformat:2 }}</td>
+                                    <td class="text-end fw-semibold {% if month_data.net_profit >= 0 %}text-success{% else %}text-danger{% endif %}">${{ month_data.net_profit|floatformat:2 }}</td>
+                                    <td class="text-end">{% if month_data.eggs_produced %}{{ month_data.eggs_produced|floatformat:0 }}{% else %}—{% endif %}</td>
+                                    <td class="text-end">{% if month_data.eggs_sold_pieces %}{{ month_data.eggs_sold_pieces|floatformat:0 }}{% else %}—{% endif %}</td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="8" class="text-center py-4 text-muted">No hay datos financieros registrados aún.</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Egg Production vs Sales Chart -->
-<div class="row">
-    <div class="col-12 mb-4">
-        <div class="card shadow">
-            <div class="card-header text-white" style="background: linear-gradient(135deg, #1a6b3a, #2e8b57);">
-                <h5 class="mb-0"><i class="fas fa-egg"></i> Producción vs Ventas de Huevo (últimos 12 meses)</h5>
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span><i class="fas fa-egg text-muted me-2"></i>Producción vs Ventas de Huevo (últimos 12 meses)</span>
             </div>
             <div class="card-body">
                 {% if monthly_financial_data %}
-                    <canvas id="eggChart" style="max-height:300px;"></canvas>
+                    <canvas id="eggChart" style="max-height: 320px;"></canvas>
                 {% else %}
                     <p class="text-center text-muted my-4">Sin datos de huevo registrados aún.</p>
                 {% endif %}
@@ -270,7 +254,7 @@
     </div>
 </div>
 
-<!-- Chart.js CDN -->
+<!-- Chart.js Library -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
@@ -284,136 +268,160 @@
     const monthlyFinancialData = JSON.parse('{{ monthly_financial_json|default:"[]"|safe }}');
     const monthlyCategoryExpenses = JSON.parse('{{ monthly_category_expenses|default:"{}"|safe }}');
 
+    // Chart.js Global Styling (Airtable Fonts & Colors)
+    Chart.defaults.font.family = "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+    Chart.defaults.font.size = 12;
+    Chart.defaults.color = '#64748b';
 
-    // 1. Sales Trend Chart
-    const ctxTrend = document.getElementById('salesTrendChart').getContext('2d');
-    new Chart(ctxTrend, {
-        type: 'line',
-        data: {
-            labels: trendLabels,
-            datasets: [{
-                label: 'Ventas Totales ($)',
-                data: trendData,
-                borderColor: '#f39c12',
-                backgroundColor: 'rgba(243, 156, 18, 0.2)',
-                borderWidth: 2,
-                fill: true,
-                tension: 0.4
-            }]
-        },
-        options: {
-            responsive: true,
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    title: {
-                        display: true,
-                        text: 'Monto ($)'
-                    }
-                }
-            }
-        }
-    });
-
-    // 2. Payment Method Chart
-    const ctxPayment = document.getElementById('paymentMethodChart').getContext('2d');
-    new Chart(ctxPayment, {
-        type: 'doughnut',
-        data: {
-            labels: paymentLabels,
-            datasets: [{
-                data: paymentData,
-                backgroundColor: [
-                    '#27ae60', // Green
-                    '#2980b9', // Blue
-                    '#8e44ad', // Purple
-                    '#e74c3c'  // Red
-                ]
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                legend: {
-                    position: 'bottom',
-                }
-            }
-        }
-    });
-
-    // 3. Top Customers Chart
-    const ctxCustomer = document.getElementById('customerChart').getContext('2d');
-    new Chart(ctxCustomer, {
-        type: 'bar',
-        data: {
-            labels: customerLabels,
-            datasets: [{
-                label: 'Total Comprado ($)',
-                data: customerData,
-                backgroundColor: '#3498db',
-                borderRadius: 5
-            }]
-        },
-        options: {
-            responsive: true,
-            indexAxis: 'y', // Horizontal bar chart
-            scales: {
-                x: {
-                    beginAtZero: true
-                }
-            }
-        }
-    });
-
-    // 4. Expense Category Chart
-    const expenseMonthSelector = document.getElementById('expenseMonthSelector');
-    const ctxExpenseCategory = document.getElementById('expenseCategoryChart').getContext('2d');
-    let expenseCategoryChart; // Declare chart variable
-
-    function renderExpenseCategoryChart(month) {
-        const categoriesData = monthlyCategoryExpenses[month] || {};
-        const labels = Object.keys(categoriesData);
-        const data = Object.values(categoriesData);
-
-        if (expenseCategoryChart) {
-            expenseCategoryChart.destroy(); // Destroy previous chart instance
-        }
-
-        expenseCategoryChart = new Chart(ctxExpenseCategory, {
-            type: 'pie', // Using pie chart for categories
+    // 1. Sales Trend Chart (Editorial Line)
+    const ctxTrend = document.getElementById('salesTrendChart');
+    if (ctxTrend) {
+        new Chart(ctxTrend.getContext('2d'), {
+            type: 'line',
             data: {
-                labels: labels,
+                labels: trendLabels,
                 datasets: [{
-                    data: data,
-                    backgroundColor: [
-                        '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9900', '#C9CBCF', '#7B7B7B'
-                    ]
+                    label: 'Ventas ($)',
+                    data: trendData,
+                    borderColor: '#181d26',
+                    backgroundColor: 'rgba(24, 29, 38, 0.05)',
+                    borderWidth: 2,
+                    pointBackgroundColor: '#181d26',
+                    pointRadius: 3,
+                    fill: true,
+                    tension: 0.3
                 }]
             },
             options: {
                 responsive: true,
                 plugins: {
-                    legend: {
-                        position: 'top',
-                    },
-                    title: {
-                        display: true,
-                        text: `Gastos por Categoría - ${month}`
+                    legend: { display: false }
+                },
+                scales: {
+                    x: { grid: { display: false } },
+                    y: {
+                        beginAtZero: true,
+                        grid: { color: '#f1f5f9' },
+                        ticks: {
+                            callback: value => '$' + value.toLocaleString()
+                        }
                     }
                 }
             }
         });
     }
 
-    // Initialize
-    if (expenseMonthSelector) {
-        renderExpenseCategoryChart(expenseMonthSelector.value);
+    // 2. Payment Method Chart (Signature Palette)
+    const ctxPayment = document.getElementById('paymentMethodChart');
+    if (ctxPayment) {
+        new Chart(ctxPayment.getContext('2d'), {
+            type: 'doughnut',
+            data: {
+                labels: paymentLabels,
+                datasets: [{
+                    data: paymentData,
+                    backgroundColor: [
+                        '#181d26', // Near-black ink
+                        '#0a2e0e', // Forest green
+                        '#f4d35e', // Signature yellow
+                        '#aa2d00'  // Coral
+                    ],
+                    borderWidth: 2,
+                    borderColor: '#ffffff'
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: { boxWidth: 12, padding: 15 }
+                    }
+                },
+                cutout: '70%'
+            }
+        });
     }
 
-    // Update chart on month selection change
-    expenseMonthSelector.addEventListener('change', (event) => {
-        renderExpenseCategoryChart(event.target.value);
-    });
+    // 3. Top Customers Chart (Clean Horizontal Bars)
+    const ctxCustomer = document.getElementById('customerChart');
+    if (ctxCustomer) {
+        new Chart(ctxCustomer.getContext('2d'), {
+            type: 'bar',
+            data: {
+                labels: customerLabels,
+                datasets: [{
+                    label: 'Total Comprado ($)',
+                    data: customerData,
+                    backgroundColor: '#181d26',
+                    borderRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                indexAxis: 'y',
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        grid: { color: '#f1f5f9' },
+                        ticks: { callback: value => '$' + value.toLocaleString() }
+                    },
+                    y: { grid: { display: false } }
+                }
+            }
+        });
+    }
+
+    // 4. Expense Category Chart
+    const expenseMonthSelector = document.getElementById('expenseMonthSelector');
+    const ctxExpenseCategory = document.getElementById('expenseCategoryChart');
+    let expenseCategoryChart;
+
+    function renderExpenseCategoryChart(month) {
+        if (!ctxExpenseCategory) return;
+        const categoriesData = monthlyCategoryExpenses[month] || {};
+        const labels = Object.keys(categoriesData);
+        const data = Object.values(categoriesData);
+
+        if (expenseCategoryChart) {
+            expenseCategoryChart.destroy();
+        }
+
+        expenseCategoryChart = new Chart(ctxExpenseCategory.getContext('2d'), {
+            type: 'doughnut',
+            data: {
+                labels: labels,
+                datasets: [{
+                    data: data,
+                    backgroundColor: [
+                        '#aa2d00', '#0a2e0e', '#fcab79', '#a8d8c4', '#f4d35e', '#181d26', '#64748b', '#d9a441'
+                    ],
+                    borderWidth: 2,
+                    borderColor: '#ffffff'
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: { boxWidth: 12, padding: 10 }
+                    }
+                },
+                cutout: '65%'
+            }
+        });
+    }
+
+    if (expenseMonthSelector) {
+        renderExpenseCategoryChart(expenseMonthSelector.value);
+        expenseMonthSelector.addEventListener('change', (e) => {
+            renderExpenseCategoryChart(e.target.value);
+        });
+    }
 
     // 5. Egg Production vs Sales Chart
     const eggCanvas = document.getElementById('eggChart');
@@ -430,25 +438,24 @@
                     {
                         label: 'Producción (pzas)',
                         data: eggProduced,
-                        backgroundColor: 'rgba(30, 139, 87, 0.75)',
-                        borderColor: '#1a6b3a',
-                        borderWidth: 1,
-                        borderRadius: 4,
+                        backgroundColor: '#0a2e0e',
+                        borderRadius: 6
                     },
                     {
                         label: 'Vendidos (pzas)',
                         data: eggSoldPieces,
-                        backgroundColor: 'rgba(217, 119, 6, 0.75)',
-                        borderColor: '#b45309',
-                        borderWidth: 1,
-                        borderRadius: 4,
+                        backgroundColor: '#f4d35e',
+                        borderRadius: 6
                     }
                 ]
             },
             options: {
                 responsive: true,
                 plugins: {
-                    legend: { position: 'top' },
+                    legend: {
+                        position: 'top',
+                        labels: { boxWidth: 12, padding: 15 }
+                    },
                     tooltip: {
                         callbacks: {
                             label: ctx => `${ctx.dataset.label}: ${ctx.parsed.y.toLocaleString()} pzas`
@@ -456,7 +463,12 @@
                     }
                 },
                 scales: {
-                    y: { beginAtZero: true, title: { display: true, text: 'Cantidad (piezas)' } }
+                    x: { grid: { display: false } },
+                    y: {
+                        beginAtZero: true,
+                        grid: { color: '#f1f5f9' },
+                        title: { display: true, text: 'Cantidad (piezas)' }
+                    }
                 }
             }
         });

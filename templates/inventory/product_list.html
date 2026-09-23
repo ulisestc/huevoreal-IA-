@@ -1,15 +1,21 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-2 mb-3">
-    <h2 class="mb-md-0"><i class="fas fa-boxes"></i> Catálogo de Productos</h2>
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-2 mb-4">
+    <div>
+        <div class="text-uppercase tracking-wider text-muted fw-bold small mb-1" style="font-size: 0.72rem; letter-spacing: 0.08em;">Inventario & Catálogo</div>
+        <div class="d-flex align-items-center gap-2">
+            <h2 class="mb-0 fw-bold text-dark fs-3">Catálogo de Productos</h2>
+            <span class="badge bg-light text-dark border">{{ products|length }} items</span>
+        </div>
+    </div>
     <div class="d-flex gap-2">
-        <a href="{% url 'supplier_list' %}" class="btn btn-outline-secondary m-0"><i class="fas fa-truck"></i> Proveedores</a>
-        <a href="{% url 'product_create' %}" class="btn btn-primary m-0"><i class="fas fa-plus"></i> Nuevo Producto</a>
+        <a href="{% url 'supplier_list' %}" class="btn btn-secondary"><i class="fas fa-truck me-1"></i> Proveedores</a>
+        <a href="{% url 'product_create' %}" class="btn btn-primary"><i class="fas fa-plus me-1"></i> Nuevo Producto</a>
     </div>
 </div>
 
-<div class="card shadow-sm">
+<div class="card">
     <div class="card-body p-0">
         <div class="table-responsive">
             <table class="table table-hover mb-0 align-middle">
@@ -17,11 +23,10 @@
                     <tr>
                         <th>Nombre</th>
                         <th>Categoría</th>
-                        <th>Proveedor</th>
+                        <th>Origen</th>
                         <th>Unidad</th>
                         <th>Costo</th>
-                        <th>Venta</th>
-
+                        <th>Precio Venta</th>
                         <th>Estado</th>
                         <th class="text-end">Acciones</th>
                     </tr>
@@ -44,8 +49,8 @@
                                 {% endif %}
                             </td>
                             <td class="text-end">
-                                <a href="{% url 'product_update' product.pk %}" class="btn btn-sm btn-outline-primary me-1"><i class="fas fa-edit"></i></a>
-                                <a href="{% url 'product_delete' product.pk %}" class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i></a>
+                                <a href="{% url 'product_update' product.pk %}" class="btn btn-sm btn-secondary me-1" title="Editar"><i class="fas fa-edit"></i></a>
+                                <a href="{% url 'product_delete' product.pk %}" class="btn btn-sm btn-outline-danger" title="Eliminar"><i class="fas fa-trash"></i></a>
                             </td>
                         </tr>
                     {% empty %}

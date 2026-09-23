@@ -68,20 +68,29 @@ Al marcar como completado (`complete_order` view) se convierte en `Sale` y descu
 ### `inventory.InventoryMovement`
 ```python
 location       = FK(Location)
+product        = FK(Product, null=True)
 quantity       = IntegerField()
-movement_type  = CharField('PRODUCCION'|'VENTA'|'TRASPASO_ENTRADA'|'TRASPASO_SALIDA'|'CORRECCION')
+movement_type  = CharField('PRODUCCION'|'COMPRA'|'VENTA'|'TRASPASO_ENTRADA'|'TRASPASO_SALIDA'|'CORRECCION')
 merma          = IntegerField(default=0)
-date           = DateTimeField(auto_now_add=True)  # ← se setea solo, no editable
+date           = DateField(default=datetime.date.today)  # ← DateField editable (NO DateTimeField). Filtrar con date= o date__gte/lte
+sale           = FK(Sale, null=True)
 ```
 - Producción de huevo → `movement_type='PRODUCCION'`
 - Ventas de huevo → `movement_type='VENTA'` (se crea automáticamente al guardar una `Sale`)
+
+### `inventory.Product` & `inventory.Supplier`
+- `Supplier`: Proveedores externos (ej. huevo comprado para reventa).
+- `Product`: Catálogo de productos vendidos (huevo propio o de proveedor, con precios de costo y venta).
+
+### `sales.RecurringOrder`
+Pedidos periódicos para clientes con entregas fijas por día de la semana. Se pueden generar pedidos masivos para reparto con un clic desde `/sales/recurring/generate/`.
 
 ### `expenses.Expense`
 ```python
 description     = CharField()
 amount          = DecimalField()
-date            = DateField()           # ← editable, distinto a DateTimeField de InventoryMovement
-category        = CharField('ALIMENTO'|'MEDICAMENTO'|'SUELDOS'|'TRANSPORTE'|'MANTENIMIENTO'|'TARJETA_CREDITO'|'OTROS')
+date            = DateField()           # ← editable
+category        = CharField('ALIMENTO'|'MEDICAMENTO'|'SUELDOS'|'TRANSPORTE'|'MANTENIMIENTO'|'TARJETA_CREDITO'|'COMPRA_HUEVO'|'OTROS')
 payment_method  = CharField('EFECTIVO'|'TRANSFERENCIA'|'TARJETA_CREDITO')
 user            = FK(CustomUser, null=True)
 ```
@@ -91,14 +100,20 @@ user            = FK(CustomUser, null=True)
 ## URLs importantes
 
 ```
-/                           → dashboard (login required)
+/                           → dashboard operativo (login required)
 /sales/                     → lista de ventas
 /sales/create/              → nueva venta
 /sales/statistics/          → estadísticas mensuales
 /sales/orders/              → pedidos pendientes
+/sales/recurring/           → pedidos recurrentes / suscripciones
+/sales/recurring/generate/  → generador masivo de pedidos para reparto
+/sales/routes/              → optimizador y mapa de rutas de reparto
 /sales/inversores/          → dashboard de inversores + calculadora ROI
 /expenses/                  → lista de gastos
+/inventory/                 → ubicaciones de inventario
 /inventory/movements/       → movimientos de inventario (producción aquí)
+/inventory/products/        → catálogo de productos
+/inventory/suppliers/       → catálogo de proveedores
 /admin/                     → Django admin
 ```
 
@@ -110,7 +125,7 @@ user            = FK(CustomUser, null=True)
 - Muestra: ventas, gastos, utilidad neta, **producción de huevo**, **huevos vendidos** (piezas + kg)
 - Tabla histórica (últimos 12 meses): incluye columnas de huevo
 - Gráficos: tendencia diaria, métodos de pago, top 5 clientes, producción vs ventas de huevo
-- Los datos de producción vienen de `InventoryMovement.movement_type='PRODUCCION'` filtrados por `date__date__range`
+- Los datos de producción vienen de `InventoryMovement.movement_type='PRODUCCION'` filtrados por `date__range=[month_start, month_end]`
 
 ## Dashboard de Inversores (`sales/views.py → InvestorDashboardView`)
 
@@ -127,25 +142,17 @@ user            = FK(CustomUser, null=True)
 1. **Datos reales siempre.** Nunca hardcodear números. Si no hay datos, mostrar "Sin datos" o "Sin registro", no ceros.
 2. **Meses incompletos fuera de KPIs.** Un mes sin gastos registrados no es representativo — excluirlo de promedios en el dashboard de inversores.
 3. **Confiabilidad explícita.** Siempre mostrar cuántos meses de historial se usaron para las proyecciones.
-4. **`InventoryMovement.date` es `auto_now_add`** — no se puede setear manualmente aunque el código lo intente en `SaleCreateView`. Al filtrar producción por mes, usar `date__date__gte` / `date__date__lte`.
+4. **`InventoryMovement.date` es `DateField`** (no DateTimeField). Al filtrar producción por fecha o rango, usar `date=today` o `date__range=[start, end]`. **NUNCA usar `date__date`** porque provocará un `FieldError` y romperá la vista con error HTTP 500.
 
 ---
 
 ## Frontend / CSS
 
 - Archivo principal: `static/css/style.css`
-- Colores: verde oscuro primario `#1e5128`, verde secundario `#4e9f3d`
+- Estilo: Airtable-style editorial SaaS con tipografía Inter, bordes sutiles `#e2e8f0`, superficies blancas `#ffffff`, tarjetas limpias y acentos `#181d26`
 - Mobile-first: breakpoint en 768px, botones full-width en móvil, `font-size: 16px` en forms para evitar zoom en iOS
 - Tablas con `table-responsive` + scroll horizontal en móvil
 - Charts con `max-height: 350px` (220px en móvil <576px)
 - Templates en `templates/<app>/`
+- Sistema de diseño de referencia disponible en: `DESIGN.md` (Airtable-style editorial SaaS)
 
----
-
-## Contexto del negocio
-
-- Vendedor de huevo en México
-- Registra ventas por **kilo** o por **pieza**
-- Clientes tienen pedidos recurrentes (flujo: Pedido → completar → Venta)
-- El dueño (Paul) quiere mostrar el negocio a inversores potenciales
-- Los datos son reales y se usarán en presentaciones — precisión crítica

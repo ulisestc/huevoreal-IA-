@@ -1,87 +1,159 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="row">
-    <div class="col-md-12">
-        <div class="alert alert-success" role="alert">
-            <h4 class="alert-heading">¡Bienvenido, {{ user.username }}!</h4>
-            <p>Has ingresado al sistema de gestión de Huevo Real.</p>
-            <hr>
-            <p class="mb-0">Usa el menú de navegación para administrar inventario, clientes y ventas.</p>
+<!-- Welcome Header Banner -->
+<div class="card mb-4">
+    <div class="card-body p-4">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
+            <div>
+                <div class="text-uppercase tracking-wider text-muted fw-bold small mb-1" style="font-size: 0.72rem; letter-spacing: 0.08em;">Panel de Control</div>
+                <h2 class="mb-1 fw-bold text-dark fs-3">Bienvenido, {{ user.username }}</h2>
+                <p class="text-muted mb-0 small">Has ingresado al sistema de gestión de Huevo Real. Usa el menú o los accesos directos para operar.</p>
+            </div>
+            <div class="d-flex flex-wrap gap-2">
+                <a href="{% url 'sale_create' %}" class="btn btn-primary"><i class="fas fa-plus me-1"></i> Nueva Venta</a>
+                <a href="{% url 'movement_create' %}" class="btn btn-secondary"><i class="fas fa-exchange-alt me-1"></i> Registrar Movimiento</a>
+            </div>
         </div>
     </div>
 </div>
 
-<div class="row mt-4">
-    <div class="col-md-4">
-        <div class="card text-center mb-4 shadow-sm">
-            <div class="card-body">
-                <i class="fas fa-boxes fa-3x text-warning mb-3"></i>
-                <h5 class="card-title">Inventario</h5>
-                <p class="card-text">Gestiona ubicaciones y existencias.</p>
-                <div class="d-grid gap-2">
-                    <a href="{% url 'location_list' %}" class="btn btn-outline-primary">Ubicaciones</a>
-                    <a href="{% url 'movement_list' %}" class="btn btn-primary">Movimientos</a>
+<!-- Main 6 Operational Modules Grid -->
+<div class="row g-3 g-lg-4">
+    <!-- 1. Inventario -->
+    <div class="col-md-6 col-lg-4">
+        <div class="card h-100">
+            <div class="card-body p-4 d-flex flex-column justify-content-between">
+                <div>
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <div class="p-2 rounded bg-light border d-flex align-items-center justify-content-center" style="width: 44px; height: 44px;">
+                            <i class="fas fa-boxes text-muted fs-5"></i>
+                        </div>
+                        <div>
+                            <h5 class="card-title fw-bold text-dark mb-0 fs-6">Inventario</h5>
+                            <span class="text-muted small">Ubicaciones y existencias</span>
+                        </div>
+                    </div>
+                    <p class="card-text text-muted small">Control de existencias por almacén, registro de producción diaria, mermas y traspasos entre bodegas.</p>
+                </div>
+                <div class="d-flex gap-2 mt-3 pt-3 border-top">
+                    <a href="{% url 'location_list' %}" class="btn btn-secondary btn-sm flex-grow-1">Ubicaciones</a>
+                    <a href="{% url 'movement_list' %}" class="btn btn-primary btn-sm flex-grow-1">Movimientos</a>
                 </div>
             </div>
         </div>
     </div>
-    <div class="col-md-4">
-        <div class="card text-center mb-4 shadow-sm">
-            <div class="card-body">
-                <i class="fas fa-users fa-3x text-info mb-3"></i>
-                <h5 class="card-title">Clientes</h5>
-                <p class="card-text">Administra tu cartera de clientes.</p>
-                <div class="d-grid">
-                    <a href="{% url 'customer_list' %}" class="btn btn-primary">Ir a Clientes</a>
+
+    <!-- 2. Clientes -->
+    <div class="col-md-6 col-lg-4">
+        <div class="card h-100">
+            <div class="card-body p-4 d-flex flex-column justify-content-between">
+                <div>
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <div class="p-2 rounded bg-light border d-flex align-items-center justify-content-center" style="width: 44px; height: 44px;">
+                            <i class="fas fa-users text-muted fs-5"></i>
+                        </div>
+                        <div>
+                            <h5 class="card-title fw-bold text-dark mb-0 fs-6">Clientes</h5>
+                            <span class="text-muted small">Cartera y geolocalización</span>
+                        </div>
+                    </div>
+                    <p class="card-text text-muted small">Directorio de clientes con datos de contacto, zonas, fraccionamientos y coordenadas GPS para reparto.</p>
+                </div>
+                <div class="mt-3 pt-3 border-top">
+                    <a href="{% url 'customer_list' %}" class="btn btn-primary btn-sm w-100">Ir a Clientes</a>
                 </div>
             </div>
         </div>
     </div>
-    <div class="col-md-4">
-        <div class="card text-center mb-4 shadow-sm">
-            <div class="card-body">
-                <i class="fas fa-clipboard-list fa-3x text-info mb-3"></i>
-                <h5 class="card-title">Pedidos</h5>
-                <p class="card-text">Gestiona los pedidos antes de convertirlos en venta.</p>
-                <div class="d-grid">
-                    <a href="{% url 'order_list' %}" class="btn btn-primary">Ir a Pedidos</a>
+
+    <!-- 3. Pedidos -->
+    <div class="col-md-6 col-lg-4">
+        <div class="card h-100">
+            <div class="card-body p-4 d-flex flex-column justify-content-between">
+                <div>
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <div class="p-2 rounded bg-light border d-flex align-items-center justify-content-center" style="width: 44px; height: 44px;">
+                            <i class="fas fa-clipboard-list text-muted fs-5"></i>
+                        </div>
+                        <div>
+                            <h5 class="card-title fw-bold text-dark mb-0 fs-6">Pedidos</h5>
+                            <span class="text-muted small">Preventa y entregas</span>
+                        </div>
+                    </div>
+                    <p class="card-text text-muted small">Registro anticipado de solicitudes de huevo por kilo o pieza antes de convertirlos en ventas cerradas.</p>
+                </div>
+                <div class="mt-3 pt-3 border-top">
+                    <a href="{% url 'order_list' %}" class="btn btn-primary btn-sm w-100">Ir a Pedidos</a>
                 </div>
             </div>
         </div>
     </div>
-    <div class="col-md-4">
-        <div class="card text-center mb-4 shadow-sm">
-            <div class="card-body">
-                <i class="fas fa-shopping-cart fa-3x text-success mb-3"></i>
-                <h5 class="card-title">Ventas</h5>
-                <p class="card-text">Registra y consulta las ventas realizadas.</p>
-                <div class="d-grid">
-                    <a href="{% url 'sale_list' %}" class="btn btn-primary">Ir a Ventas</a>
+
+    <!-- 4. Ventas -->
+    <div class="col-md-6 col-lg-4">
+        <div class="card h-100">
+            <div class="card-body p-4 d-flex flex-column justify-content-between">
+                <div>
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <div class="p-2 rounded bg-light border d-flex align-items-center justify-content-center" style="width: 44px; height: 44px;">
+                            <i class="fas fa-shopping-cart text-muted fs-5"></i>
+                        </div>
+                        <div>
+                            <h5 class="card-title fw-bold text-dark mb-0 fs-6">Ventas</h5>
+                            <span class="text-muted small">Despacho y cobranza</span>
+                        </div>
+                    </div>
+                    <p class="card-text text-muted small">Historial completo de salidas, métodos de pago (efectivo o transferencia) y saldos pagados vs pendientes.</p>
+                </div>
+                <div class="mt-3 pt-3 border-top">
+                    <a href="{% url 'sale_list' %}" class="btn btn-primary btn-sm w-100">Ir a Ventas</a>
                 </div>
             </div>
         </div>
     </div>
-    <div class="col-md-4">
-        <div class="card text-center mb-4 shadow-sm">
-            <div class="card-body">
-                <i class="fas fa-chart-pie fa-3x text-danger mb-3"></i>
-                <h5 class="card-title">Estadísticas</h5>
-                <p class="card-text">Visualiza el desempeño del negocio.</p>
-                <div class="d-grid">
-                    <a href="{% url 'statistics' %}" class="btn btn-primary">Ver Gráficas</a>
+
+    <!-- 5. Estadísticas -->
+    <div class="col-md-6 col-lg-4">
+        <div class="card h-100">
+            <div class="card-body p-4 d-flex flex-column justify-content-between">
+                <div>
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <div class="p-2 rounded bg-light border d-flex align-items-center justify-content-center" style="width: 44px; height: 44px;">
+                            <i class="fas fa-chart-pie text-muted fs-5"></i>
+                        </div>
+                        <div>
+                            <h5 class="card-title fw-bold text-dark mb-0 fs-6">Estadísticas</h5>
+                            <span class="text-muted small">Márgenes y utilidades</span>
+                        </div>
+                    </div>
+                    <p class="card-text text-muted small">Reportes financieros mensuales: ingresos reales vs gastos, utilidad neta acumulada y comparativa de producción.</p>
+                </div>
+                <div class="mt-3 pt-3 border-top">
+                    <a href="{% url 'statistics' %}" class="btn btn-primary btn-sm w-100">Ver Gráficas</a>
                 </div>
             </div>
         </div>
     </div>
-    <div class="col-md-4">
-        <div class="card text-center mb-4 shadow-sm">
-            <div class="card-body">
-                <i class="fas fa-file-invoice-dollar fa-3x text-secondary mb-3"></i>
-                <h5 class="card-title">Gastos</h5>
-                <p class="card-text">Registra y controla los gastos del negocio.</p>
-                <div class="d-grid">
-                    <a href="{% url 'expense_list' %}" class="btn btn-primary">Ir a Gastos</a>
+
+    <!-- 6. Gastos -->
+    <div class="col-md-6 col-lg-4">
+        <div class="card h-100">
+            <div class="card-body p-4 d-flex flex-column justify-content-between">
+                <div>
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <div class="p-2 rounded bg-light border d-flex align-items-center justify-content-center" style="width: 44px; height: 44px;">
+                            <i class="fas fa-file-invoice-dollar text-muted fs-5"></i>
+                        </div>
+                        <div>
+                            <h5 class="card-title fw-bold text-dark mb-0 fs-6">Gastos</h5>
+                            <span class="text-muted small">Egresos operativos</span>
+                        </div>
+                    </div>
+                    <p class="card-text text-muted small">Registro detallado de costos operativos: alimento de aves, medicamentos, sueldos, transporte y mantenimiento.</p>
+                </div>
+                <div class="mt-3 pt-3 border-top">
+                    <a href="{% url 'expense_list' %}" class="btn btn-primary btn-sm w-100">Ir a Gastos</a>
                 </div>
             </div>
         </div>

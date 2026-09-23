@@ -3,11 +3,13 @@
 {% block content %}
 <div class="row justify-content-center">
     <div class="col-md-8 col-lg-6">
-        <div class="card shadow">
-            <div class="card-header">
-                <h3 class="mb-0">{% if form.instance.pk %}Editar Proveedor: {{ form.instance.name }}{% else %}Crear Nuevo Proveedor{% endif %}</h3>
+        <div class="card">
+            <div class="card-header d-flex align-items-center justify-content-between">
+                <h3 class="mb-0 fs-5 fw-bold text-dark">
+                    <i class="fas fa-truck text-muted me-2"></i>{% if form.instance.pk %}Editar Proveedor: {{ form.instance.name }}{% else %}Crear Nuevo Proveedor{% endif %}
+                </h3>
             </div>
-            <div class="card-body">
+            <div class="card-body p-4">
                 <form method="post">
                     {% csrf_token %}
                     
@@ -41,9 +43,9 @@
                         {{ form.is_active.errors }}
                     </div>
 
-                    <div class="d-grid gap-2 mt-4">
-                        <button type="submit" class="btn btn-primary btn-lg">Guardar Proveedor</button>
-                        <a href="{% url 'supplier_list' %}" class="btn btn-secondary btn-lg">Cancelar</a>
+                    <div class="d-flex justify-content-end gap-2 mt-4">
+                        <a href="{% url 'supplier_list' %}" class="btn btn-secondary px-4">Cancelar</a>
+                        <button type="submit" class="btn btn-primary px-4">Guardar Proveedor</button>
                     </div>
                 </form>
             </div>

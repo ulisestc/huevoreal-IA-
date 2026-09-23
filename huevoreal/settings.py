@@ -14,11 +14,11 @@ from pathlib import Path
 import os
 from dotenv import load_dotenv
 
-# Load environment variables from .env file
-load_dotenv()
-
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Load environment variables from .env file located at BASE_DIR
+load_dotenv(BASE_DIR / '.env')
 
 
 # Quick-start development settings - unsuitable for production
@@ -31,6 +31,10 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-default-key-change-me')
 DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '127.0.0.1,localhost').split(',')
+
+# Configuración de Mapas (Opcionales para capas comerciales)
+MAPBOX_ACCESS_TOKEN = os.getenv('MAPBOX_ACCESS_TOKEN', '')
+CARTO_API_KEY = os.getenv('CARTO_API_KEY', '')
 
 
 # Application definition

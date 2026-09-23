@@ -3,17 +3,19 @@
 {% block content %}
 <div class="row justify-content-center">
     <div class="col-md-8 col-lg-6">
-        <div class="card shadow">
-            <div class="card-header">
-                <h3 class="mb-0">Registrar Traspaso</h3>
+        <div class="card">
+            <div class="card-header d-flex align-items-center justify-content-between">
+                <h3 class="mb-0 fs-5 fw-bold text-dark">
+                    <i class="fas fa-random text-muted me-2"></i>Registrar Traspaso entre Bodegas
+                </h3>
             </div>
-            <div class="card-body">
+            <div class="card-body p-4">
                 <form method="post">
                     {% csrf_token %}
                     {{ form.as_p }}
-                    <div class="d-grid gap-2 mt-4">
-                        <button type="submit" class="btn btn-primary btn-lg">Realizar Traspaso</button>
-                        <a href="{% url 'movement_list' %}" class="btn btn-secondary btn-lg">Cancelar</a>
+                    <div class="d-flex justify-content-end gap-2 mt-4">
+                        <a href="{% url 'movement_list' %}" class="btn btn-secondary px-4">Cancelar</a>
+                        <button type="submit" class="btn btn-primary px-4">Realizar Traspaso</button>
                     </div>
                 </form>
             </div>

@@ -17,6 +17,7 @@ from django.core.serializers.json import DjangoJSONEncoder
 from expenses.models import Expense
 from django.contrib.auth import get_user_model
 from django.contrib import messages
+from django.conf import settings
 
 class SaleListView(LoginRequiredMixin, ListView):
     model = Sale
@@ -733,7 +734,9 @@ class RouteOptimizerView(LoginRequiredMixin, TemplateView):
             'orders': orders,
             'orders_json': json.dumps(orders_data, cls=DjangoJSONEncoder),
             'locations': locations,
-            'locations_json': json.dumps(locations_data, cls=DjangoJSONEncoder)
+            'locations_json': json.dumps(locations_data, cls=DjangoJSONEncoder),
+            'mapbox_access_token': getattr(settings, 'MAPBOX_ACCESS_TOKEN', ''),
+            'carto_api_key': getattr(settings, 'CARTO_API_KEY', '')
         })
         return context
 

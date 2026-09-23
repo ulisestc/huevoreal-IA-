@@ -1,9 +1,12 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-2 mb-3">
-    <h2 class="mb-md-0">Ventas</h2>
-    <a href="{% url 'sale_create' %}" class="btn btn-primary m-0"><i class="fas fa-plus"></i> Nueva Venta</a>
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-4 pb-3 border-bottom">
+    <div>
+        <h2 class="mb-1 fw-medium">Ventas & Tickets</h2>
+        <p class="text-muted mb-0 small">Historial de ventas, control de cobranza y comprobantes por WhatsApp</p>
+    </div>
+    <a href="{% url 'sale_create' %}" class="btn btn-primary"><i class="fas fa-plus"></i> Nueva Venta</a>
 </div>
 
 <div class="card mb-4">
@@ -43,8 +46,8 @@
                         <i class="fas fa-list"></i> Ver Todas
                     </a>
                 {% else %}
-                    <a href="{% url 'sale_list' %}?status=pending{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if selected_seller %}&seller={{ selected_seller }}{% endif %}" class="btn btn-warning text-dark m-0">
-                        <i class="fas fa-exclamation-circle"></i> Ver Pendientes
+                    <a href="{% url 'sale_list' %}?status=pending{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if selected_seller %}&seller={{ selected_seller }}{% endif %}" class="btn btn-outline-danger m-0">
+                        <i class="fas fa-exclamation-circle text-danger"></i> Ver Pendientes
                     </a>
                 {% endif %}
             </div>
@@ -103,7 +106,7 @@
                             </td>
                             <td>{{ sale.seller }}</td>
                             <td>
-                                <a href="{% url 'sale_update' sale.pk %}" class="btn btn-sm btn-outline-primary"><i class="fas fa-edit"></i></a>
+                                <a href="{% url 'sale_update' sale.pk %}" class="btn btn-sm btn-secondary" title="Editar"><i class="fas fa-edit"></i></a>
                             </td>
                         </tr>
                     {% empty %}

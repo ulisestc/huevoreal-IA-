@@ -3,11 +3,13 @@
 {% block content %}
 <div class="row justify-content-center">
     <div class="col-md-8 col-lg-8">
-        <div class="card shadow">
-            <div class="card-header">
-                <h3 class="mb-0">{% if object %}Editar Cliente: {{ object }}{% else %}Crear Nuevo Cliente{% endif %}</h3>
+        <div class="card">
+            <div class="card-header d-flex align-items-center justify-content-between">
+                <h3 class="mb-0 fs-5 fw-bold text-dark">
+                    <i class="fas fa-user text-muted me-2"></i>{% if object %}Editar Cliente: {{ object }}{% else %}Crear Nuevo Cliente{% endif %}
+                </h3>
             </div>
-            <div class="card-body">
+            <div class="card-body p-4">
                 <form method="post">
                     {% csrf_token %}
                     
@@ -75,7 +77,7 @@
                             {{ form.longitude.errors }}
                         </div>
                         <div class="col-md-2 mb-3 d-flex align-items-end pb-1">
-                            <button type="button" class="btn btn-outline-success w-100 btn-lg d-flex align-items-center justify-content-center" id="btn-gps" title="Obtener coordenadas actuales" style="height: 48px;">
+                            <button type="button" class="btn btn-outline-secondary w-100 btn-lg d-flex align-items-center justify-content-center" id="btn-gps" title="Obtener coordenadas actuales" style="height: 48px;">
                                 <i class="fas fa-map-marker-alt"></i> <span class="d-none d-lg-inline ms-2">GPS</span>
                             </button>
                         </div>
@@ -90,9 +92,9 @@
                         </div>
                     </div>
 
-                    <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
-                        <a href="{% url 'customer_list' %}" class="btn btn-secondary btn-lg px-4 me-md-2">Cancelar</a>
-                        <button type="submit" class="btn btn-primary btn-lg px-5">Guardar</button>
+                    <div class="d-flex justify-content-end gap-2 mt-4">
+                        <a href="{% url 'customer_list' %}" class="btn btn-secondary px-4">Cancelar</a>
+                        <button type="submit" class="btn btn-primary px-4">Guardar Cliente</button>
                     </div>
                 </form>
             </div>

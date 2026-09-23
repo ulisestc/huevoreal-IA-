@@ -2,19 +2,23 @@
 
 {% block content %}
 <div class="row justify-content-center">
-    <div class="col-md-6 col-lg-4">
-        <div class="card shadow border-danger">
-            <div class="card-header bg-danger text-white">
-                <h3 class="mb-0">Eliminar Suscripción</h3>
+    <div class="col-md-6 col-lg-5">
+        <div class="card">
+            <div class="card-header d-flex align-items-center gap-2">
+                <span class="badge bg-danger rounded-circle p-2 d-flex align-items-center justify-content-center" style="width: 28px; height: 28px;">
+                    <i class="fas fa-trash-alt text-white" style="font-size: 0.8rem;"></i>
+                </span>
+                <h3 class="mb-0 fs-5 fw-bold text-dark">Eliminar Suscripción</h3>
             </div>
-            <div class="card-body">
-                <p>¿Estás seguro de que deseas eliminar la suscripción recurrente de <strong>{{ object.customer }}</strong> para el producto <strong>{{ object.product.name }}</strong>?</p>
+            <div class="card-body p-4 text-center">
+                <p class="fs-5 mb-2 text-dark">¿Estás seguro de que deseas eliminar la suscripción recurrente de <strong>"{{ object.customer }}"</strong>?</p>
+                <p class="text-muted small mb-4">Producto: <strong>{{ object.product.name }}</strong> • Esta entrega recurrente se detendrá de inmediato.</p>
                 
                 <form method="post">
                     {% csrf_token %}
-                    <div class="d-grid gap-2">
-                        <button type="submit" class="btn btn-danger btn-lg">Sí, Eliminar</button>
-                        <a href="{% url 'recurring_order_list' %}" class="btn btn-secondary btn-lg">Cancelar</a>
+                    <div class="d-flex justify-content-center gap-2">
+                        <a href="{% url 'recurring_order_list' %}" class="btn btn-secondary px-4">Cancelar</a>
+                        <button type="submit" class="btn btn-danger px-4">Sí, Eliminar</button>
                     </div>
                 </form>
             </div>
