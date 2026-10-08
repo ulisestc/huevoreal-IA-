@@ -49,3 +49,19 @@ class Customer(models.Model):
             return f"{self.first_name} {self.last_name}"
         return self.first_name
 
+    def clean_and_format_phone(self):
+        import re
+        if not self.phone_number:
+            return
+        digits = re.sub(r'\D', '', str(self.phone_number))
+        if len(digits) == 13 and digits.startswith('521'):
+            digits = digits[3:]
+        elif len(digits) == 12 and digits.startswith('52'):
+            digits = digits[2:]
+        if len(digits) == 10:
+            self.phone_number = f"{digits[:3]} {digits[3:6]} {digits[6:]}"
+
+    def save(self, *args, **kwargs):
+        self.clean_and_format_phone()
+        super().save(*args, **kwargs)
+

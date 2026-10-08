@@ -275,9 +275,9 @@ class StatisticsView(LoginRequiredMixin, TemplateView):
 
         # 4. Sales by Seller (Selected Month)
         seller_sales = Sale.objects.filter(day__range=[month_start, month_end])\
-            .values('seller__username')\
-            .annotate(total=Sum('price'))\
-            .order_by('seller__username')
+            .values('seller__username', 'seller__first_name', 'seller__last_name')\
+            .annotate(total=Sum('price'), count=Count('id'))\
+            .order_by('-total')
 
         # 5. Expenses & Profit (Selected Month)
         total_sales_month = Sale.objects.filter(day__range=[month_start, month_end]).aggregate(Sum('price'))['price__sum'] or Decimal('0.00')

@@ -61,7 +61,15 @@
                             <td class="fw-bold">{{ customer.first_name }}</td>
                             <td>{{ customer.last_name|default:"—" }}</td>
                             <td>{{ customer.address }}</td>
-                            <td>{{ customer.phone_number }}</td>
+                            <td class="text-nowrap">
+                                {% if customer.phone_number %}
+                                    <a href="tel:{{ customer.phone_number|cut:' ' }}" class="text-decoration-none text-dark fw-medium" onclick="event.stopPropagation();" title="Llamar al {{ customer.phone_number }}">
+                                        <i class="fas fa-phone-alt me-1 text-muted small"></i>{{ customer.phone_number }}
+                                    </a>
+                                {% else %}
+                                    <span class="text-muted">—</span>
+                                {% endif %}
+                            </td>
                             <td>
                                 {% if customer.fraccionamiento %}
                                     <span class="badge bg-light text-dark border"><i class="fas fa-building me-1 text-muted"></i>{{ customer.fraccionamiento.name }}</span>
@@ -241,7 +249,12 @@
                     const obs = row.getAttribute('data-obs');
 
                     document.getElementById('modal-customer-name').textContent = `${firstName} ${lastName}`.trim();
-                    document.getElementById('modal-customer-phone-badge').innerHTML = `<i class="fas fa-phone-alt me-1"></i>${phone}`;
+                    if (phone && phone !== '—' && phone !== '-') {
+                        const cleanDigits = phone.replace(/\s+/g, '');
+                        document.getElementById('modal-customer-phone-badge').innerHTML = `<a href="tel:${cleanDigits}" class="text-decoration-none text-dark" title="Llamar"><i class="fas fa-phone-alt me-1 text-muted"></i>${phone}</a>`;
+                    } else {
+                        document.getElementById('modal-customer-phone-badge').innerHTML = `<i class="fas fa-phone-alt me-1"></i>Sin teléfono`;
+                    }
                     document.getElementById('modal-customer-address').textContent = address;
                     document.getElementById('modal-customer-fraccionamiento').textContent = fraccionamiento;
                     document.getElementById('modal-customer-zona').textContent = zona;

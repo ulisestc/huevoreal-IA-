@@ -289,6 +289,52 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
+
+    // Máscara interactiva de Teléfono NNN NNN NNNN
+    const phoneInput = document.getElementById('id_phone_number');
+    if (phoneInput) {
+        phoneInput.setAttribute('type', 'tel');
+        phoneInput.setAttribute('inputmode', 'numeric');
+        phoneInput.setAttribute('autocomplete', 'tel');
+        phoneInput.setAttribute('maxlength', '12');
+
+        function formatPhoneNumber(val) {
+            if (!val) return '';
+            let digits = val.replace(/\D/g, '');
+            if (digits.length === 13 && digits.startsWith('521')) {
+                digits = digits.slice(3);
+            } else if (digits.length === 12 && digits.startsWith('52')) {
+                digits = digits.slice(2);
+            }
+            digits = digits.slice(0, 10);
+
+            if (digits.length > 6) {
+                return `${digits.slice(0, 3)} ${digits.slice(3, 6)} ${digits.slice(6)}`;
+            } else if (digits.length > 3) {
+                return `${digits.slice(0, 3)} ${digits.slice(3)}`;
+            }
+            return digits;
+        }
+
+        phoneInput.addEventListener('input', function() {
+            const cursor = this.selectionStart;
+            const oldVal = this.value;
+            const newVal = formatPhoneNumber(oldVal);
+            this.value = newVal;
+
+            if (cursor < oldVal.length) {
+                this.setSelectionRange(cursor, cursor);
+            }
+        });
+
+        phoneInput.addEventListener('blur', function() {
+            this.value = formatPhoneNumber(this.value);
+        });
+
+        if (phoneInput.value) {
+            phoneInput.value = formatPhoneNumber(phoneInput.value);
+        }
+    }
 });
 </script>
 {% endblock %}

@@ -158,7 +158,7 @@
 <!-- Charts Section 2 -->
 <div class="row g-4 mb-4">
     <!-- Top Clientes -->
-    <div class="col-lg-6">
+    <div class="col-lg-4">
         <div class="card h-100">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <span><i class="fas fa-users text-muted me-2"></i>Top 5 Clientes — {{ view_date|date:"F" }}</span>
@@ -169,8 +169,50 @@
         </div>
     </div>
 
+    <!-- Ventas por Vendedor -->
+    <div class="col-lg-4">
+        <div class="card h-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span><i class="fas fa-user-tie text-muted me-2"></i>Ventas por Vendedor — {{ view_date|date:"F" }}</span>
+            </div>
+            <div class="card-body p-0">
+                {% if seller_sales %}
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0 align-middle">
+                            <thead>
+                                <tr>
+                                    <th>Vendedor</th>
+                                    <th class="text-center">Ventas</th>
+                                    <th class="text-end">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in seller_sales %}
+                                    <tr>
+                                        <td class="fw-medium">
+                                            <i class="fas fa-user-circle me-1 text-muted"></i>
+                                            {% if item.seller__first_name %}
+                                                {{ item.seller__first_name }} {{ item.seller__last_name }}
+                                            {% else %}
+                                                {{ item.seller__username|default:"Sin asignación" }}
+                                            {% endif %}
+                                        </td>
+                                        <td class="text-center"><span class="badge bg-light text-dark border">{{ item.count }}</span></td>
+                                        <td class="text-end fw-semibold text-success">${{ item.total|floatformat:2 }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center py-4 text-muted small">Sin ventas registradas este mes.</div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
     <!-- Gastos por Categoría -->
-    <div class="col-lg-6">
+    <div class="col-lg-4">
         <div class="card h-100">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <span><i class="fas fa-chart-pie text-muted me-2"></i>Gastos por Categoría</span>

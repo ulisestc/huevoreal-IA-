@@ -423,7 +423,7 @@
                         </div>
                         <h5 class="mb-0 fw-bold text-dark fs-6">${stop.customer_name}</h5>
                         <p class="mb-0 text-muted small"><i class="fas fa-map-marker-alt me-1"></i> ${stop.address}</p>
-                        ${stop.phone ? `<p class="mb-0 text-muted small"><i class="fas fa-phone me-1"></i> ${stop.phone}</p>` : ''}
+                        ${stop.phone ? `<p class="mb-0 text-muted small"><a href="tel:${stop.phone.replace(/\s+/g, '')}" class="text-decoration-none text-muted" title="Llamar al cliente"><i class="fas fa-phone me-1"></i> ${stop.phone}</a></p>` : ''}
                         <div class="d-flex gap-2 mt-2">
                             <a href="https://www.google.com/maps/dir/?api=1&origin=${startCoords.lat},${startCoords.lon}&destination=${stop.lat},${stop.lon}" target="_blank" class="btn btn-sm btn-primary flex-grow-1">
                                 <i class="fab fa-google me-1"></i> Google Maps
